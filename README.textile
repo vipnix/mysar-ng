@@ -7,9 +7,9 @@ MySQL Squid Access Report (new generation) ---> Clone off http://sourceforge.net
 h1. MYSAR-ng Handbook
 
 h2. Requirements:
-<pre>Apache
+<pre><code>Apache
 Mysql
-GCC</pre>
+GCC</code></pre>
 
 h2. Installation:
 
