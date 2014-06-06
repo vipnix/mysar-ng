@@ -23,10 +23,9 @@ h3. 1- Install on APACHE:
         Allow from all
 </Directory></code></pre>
 
-h3. 2- Install database on MYSQL:
-<pre><code>create database mysar;</code></pre>
-
-<pre><code>grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar123';</code></pre>
+h3. 2- Create and Install database on MYSQL:
+<pre><code>mysql> create database mysar;
+mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar123';</code></pre>
 
 <pre><code>mysql mysar < mysar.sql </code></pre>
 
@@ -37,5 +36,4 @@ h3. 3- Compile Binary importer
 
 h3. 4- Configure your crontab
 <pre><code># crontab
-# MYSAR - logs do squid
 * * * * *      root    /usr/bin/mysar > /srv/www/htdocs/mysar/log/mysar-importer.log 2>&1</code></pre>
