@@ -21,8 +21,8 @@ h3. 1- Install on APACHE:
         AllowOverride None
         Order allow,deny
         Allow from all
-</Directory>
 </code></pre>
+<code></Directory></code>
 
 h3. 2- Create and Install database on MYSQL:
 <pre><code>mysql> create database mysar;
