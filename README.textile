@@ -20,8 +20,7 @@ h3. 1- Install on APACHE:
         Options Indexes FollowSymLinks
         AllowOverride None
         Order allow,deny
-        Allow from all
-</code>
+        Allow from all</code>
 <code></Directory></code></pre>
 
 h3. 2- Create and Install database on MYSQL:
