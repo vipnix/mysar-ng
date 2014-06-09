@@ -21,7 +21,7 @@ Clone repository:
 mv /opt/mysar-ng/mysar /srv/www/htdocs/</code></pre>
 
 Copy file to apache conf dir:
-<pre><code>cp mysar/etc/mysar.apache /etc/apache2/vhosts.d/mysar.conf</code></pre>
+<pre><code>cp /srv/www/htdocs/mysar/etc/mysar.apache /etc/apache2/vhosts.d/mysar.conf</code></pre>
 
 Or configure manually:
 <pre><code>Alias /mysar /srv/www/htdocs/mysar/www
@@ -45,7 +45,7 @@ Import default database:
 
 h3. 3- Compile Binary importer
 
-<pre><code>cd mysar/bin/mysar-binary-importer/ ; make clean && make && make install</code></pre>
+<pre><code>cd /srv/www/htdocs/mysar/bin/mysar-binary-importer/ ; make clean && make && make install</code></pre>
 
 
 h3. 4- Configure your crontab
