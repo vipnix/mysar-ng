@@ -14,6 +14,10 @@ GCC</code></pre>
 h2. Installation:
 
 h3. 1- Install on APACHE:
+Copy file to apache conf dir:
+<pre><code>cp mysar/etc/mysar.apache /etc/apache2/vhosts.d/mysar.conf</code></pre>
+
+Or configure manually:
 <pre><code>Alias /mysar /srv/www/htdocs/mysar/www
 <Directory "/srv/www/htdocs/mysar/www">
         Options Indexes MultiViews
@@ -31,7 +35,7 @@ mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar
 
 
 h3. 3- Compile Binary importer
-<pre><code>cd mysar-web/bin/mysar-binary-importer/ ; make && make install</code></pre>
+<pre><code>cd mysar/bin/mysar-binary-importer/ ; make clean && make && make install</code></pre>
 
 
 h3. 4- Configure your crontab

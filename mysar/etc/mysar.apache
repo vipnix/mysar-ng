@@ -1,1 +1,8 @@
 Alias /mysar /srv/www/htdocs/mysar/www
+<Directory "/srv/www/htdocs/mysar/www">
+        Options Indexes MultiViews
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+</Directory>
