@@ -16,12 +16,12 @@ h2. Installation:
 
 h3. 1- Install on APACHE:
 
-h4. Clone repository:
+h4. 1.1- Clone repository:
 
 <pre><code>cd /opt ; git clone https://github.com/coffnix/mysar-ng.git
 mv /opt/mysar-ng/mysar /srv/www/htdocs/</code></pre>
 
-h4. Copy file to apache conf dir:
+h4. 1.2- Copy file to apache conf dir:
 
 <pre><code>cp /srv/www/htdocs/mysar/etc/mysar.apache /etc/apache2/vhosts.d/mysar.conf</code></pre>
 
@@ -36,17 +36,19 @@ h4. or configure manually:
         Allow from all</code>
 <code></Directory></code></pre>
 
-h4. Restart apache:
+h4. 1.3- Restart apache:
 
 <pre><code>/etc/init.d/apache2 restart</code></pre>
 
-h3. 2- Create and Install database on MYSQL:
+h3. 2- Install on MYSQL:
+
+h4. 2.1- Create user and database:
 
 <pre><code>mysql> create database mysar;
 mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar123';
 mysql> flush privileges;</code></pre>
 
-Import default database:
+h4. 2.2- Import default database:
 <pre><code>mysql mysar < /opt/mysar-ng/mysar.sql </code></pre>
 
 
