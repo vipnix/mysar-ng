@@ -4,9 +4,9 @@
 #0 0 * * *	root	/srv/www/htdocs/mysar/bin/mysar-maintenance.php > /srv/www/htdocs/mysar/log/mysar-maintenance.log 2>&1
 
 ##### IMPORTER #####
-## PHP - Slow but tested. The defult choice, for now.
+## PHP - Slow but tested.
 #* * * * *	root	/srv/www/htdocs/mysar/bin/mysar-importer.php > /srv/www/htdocs/mysar/log/mysar-importer.log 2>&1
-## Binary. Fast but untested. Needs compile. Check README.
+## Binary. Fast but needs compile. The defult choice. check README.
 * * * * *      root    /usr/bin/mysar > /srv/www/htdocs/mysar/log/mysar-importer.log 2>&1
 
 ##### LOG ROTATE #####
