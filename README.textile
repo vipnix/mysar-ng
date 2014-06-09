@@ -29,8 +29,10 @@ Or configure manually:
 
 h3. 2- Create and Install database on MYSQL:
 <pre><code>mysql> create database mysar;
-mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar123';</code></pre>
+mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar123';
+mysql> flush privileges;</code></pre>
 
+Import default database:
 <pre><code>mysql mysar < mysar.sql </code></pre>
 
 
