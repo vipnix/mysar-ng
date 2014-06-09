@@ -41,4 +41,5 @@ h3. 3- Compile Binary importer
 
 
 h3. 4- Configure your crontab
-<pre><code>* * * * *      root    /usr/bin/mysar > /srv/www/htdocs/mysar/log/mysar-importer.log 2>&1</code></pre>
+<pre><code>* * * * *      root    /usr/bin/mysar > /srv/www/htdocs/mysar/log/mysar-importer.log 2>&1
+01 00 * * * root /srv/www/htdocs/mysar/bin/mysar-rotate-diario.sh</code></pre>
