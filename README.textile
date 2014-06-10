@@ -61,3 +61,22 @@ h3. 4- Configure your crontab
 
 <pre><code>* * * * *      root    /usr/bin/mysar > /srv/www/htdocs/mysar/log/mysar-importer.log 2>&1
 01 00 * * * root /srv/www/htdocs/mysar/bin/mysar-rotate-diario.sh</code></pre>
+
+
+h1. Best practices
+
+h2. turn off logs cache_object on SQUID:
+
+<pre><code>acl manager proto cache_object
+acl localhost src 127.0.0.1/32
+
+log_access deny manager
+http_access allow manager localhost</code></pre>
+
+For more infos, please RTFM :D
+
+Squid old: http://www.squid-cache.org/Doc/config/log_access/
+
+Squid new: http://www.squid-cache.org/Doc/config/access_log/ 
+
+
