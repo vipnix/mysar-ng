@@ -249,6 +249,17 @@ int main(int argc, char *argv[])
 		if (strstr(mws[6], "cache_object") != NULL) 
 			continue;
 
+                // discard tokens with localhost
+                if (strstr(mws[2], "localhost") != NULL)
+                        continue;
+                // discard tokens with localhost IPV4
+                if (strstr(mws[2], "127.0.0.1") != NULL)
+                        continue;
+
+                // discard tokens with localhost IPV6
+                if (strstr(mws[2], "::1") != NULL)
+                        continue;
+
 		// dont waste processing power if the record is zero bytes...
 		if (memcmp(mws[4], "0", 1) == 0)
 			continue;
