@@ -33,7 +33,7 @@ h4. or configure manually:
         Options Indexes FollowSymLinks
         AllowOverride None
         Order allow,deny
-        Allow from all</code>
+        Allow from all
 </Directory></code></pre>
 
 h4. 1.3- Restart apache:
