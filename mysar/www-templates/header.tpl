@@ -16,4 +16,4 @@
   </head>
     <body><center>
     <h1>{$pageVars.programName} {$pageVars.programVersion}</h1>
-    <p>[ <a href=".">Relat&oacute;rio Di&aacute;rio</a> | <a href="./?a=administration">Administra&ccedil;&atilde;o</a> ]</p>
+    <p>[ <a href=".">Relat&oacute;rio Di&aacute;rio</a> | <a href="{$smarty.server.PHP_SELF}?a=administration">Administra&ccedil;&atilde;o</a> ]</p>

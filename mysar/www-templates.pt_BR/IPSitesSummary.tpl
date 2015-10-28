@@ -1,5 +1,5 @@
 <nobr>[
-<a href="./?a=IPSummary&date={$pageVars.today}">&lt;&lt;&lt; Voltar para "Estacoes e usuarios de um dia especifico"</a>
+<a href="{$smarty.server.PHP_SELF}?a=IPSummary&date={$pageVars.today}">&lt;&lt;&lt; Voltar para "Estacoes e usuarios de um dia especifico"</a>
 |
 <a href="{$pageVars.uri}">Atualizar esta p&aacute;gina</a>
 ]</nobr>
@@ -9,21 +9,21 @@
 <table>
   <tr><td style="font-size: 20px;">
     {if $pageVars.previousWeekID != ""}
-      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
+      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
 	{/if}
     {if $pageVars.previousDateID != ""}
-      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousDate}&usersID={$pageVars.previousDateID}">&lt;</a>
+      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousDate}&usersID={$pageVars.previousDateID}">&lt;</a>
 	{/if}
     {$pageVars.thisDateFormatted}
     {if $pageVars.nextDateID != ""}
-      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextDate}&usersID={$pageVars.nextDateID}">&gt;</a>
+      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextDate}&usersID={$pageVars.nextDateID}">&gt;</a>
 	{/if}
     {if $pageVars.nextWeekID != ""}
-      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextWeek}&usersID={$pageVars.nextWeekID}">&gt;&gt;</a>
+      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextWeek}&usersID={$pageVars.nextWeekID}">&gt;&gt;</a>
 	{/if}
   </td></tr>
   <tr><td style="text-align:center;">
-    <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.today}&usersID={$pageVars.usersID}">[ Ir para o dia de Hoje ]</a>
+    <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.today}&usersID={$pageVars.usersID}">[ Ir para o dia de Hoje ]</a>
   </td></tr>
 </table>
 <p>
@@ -46,7 +46,7 @@
 </table>
 <p>
       [
-        <a href="./?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.byteUnit}&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}">
+        <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.byteUnit}&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}">
           Manter esta visualiza&ccedil;&atilde;o como padr&atilde;o
         </a>
       ]
@@ -54,34 +54,34 @@
     <tr>
       <th></th>
       <th>
-        <a href="./?{$pageVars.url.siteASC}"><img border="{$pageVars.siteASCImageBorder}" src="images/up-arrow.gif"></a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.siteASC}"><img border="{$pageVars.siteASCImageBorder}" src="images/up-arrow.gif"></a>
           {$pageVars.siteLabelStart}SITE{$pageVars.siteLabelEnd}
-        <a href="./?{$pageVars.url.siteDESC}"><img border="{$pageVars.siteDESCImageBorder}" src="images/down-arrow.gif"></a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.siteDESC}"><img border="{$pageVars.siteDESCImageBorder}" src="images/down-arrow.gif"></a>
       </th>
       <th width="110">
-        <a href="./?{$pageVars.url.bytesASC}"><img border="{$pageVars.bytesASCImageBorder}" src="images/up-arrow.gif"></a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.bytesASC}"><img border="{$pageVars.bytesASCImageBorder}" src="images/up-arrow.gif"></a>
           {$pageVars.bytesLabelStart}BYTES{$pageVars.bytesLabelEnd}
-        <a href="./?{$pageVars.url.bytesDESC}"><img border="{$pageVars.bytesDESCImageBorder}" src="images/down-arrow.gif"></a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.bytesDESC}"><img border="{$pageVars.bytesDESCImageBorder}" src="images/down-arrow.gif"></a>
         <br>
-        <a href="./?{$pageVars.url.B}">{$pageVars.BLabelStart}B{$pageVars.BLabelEnd}</a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.B}">{$pageVars.BLabelStart}B{$pageVars.BLabelEnd}</a>
         |
-        <a href="./?{$pageVars.url.K}">{$pageVars.KLabelStart}K{$pageVars.KLabelEnd}</a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.K}">{$pageVars.KLabelStart}K{$pageVars.KLabelEnd}</a>
         |
-        <a href="./?{$pageVars.url.M}">{$pageVars.MLabelStart}M{$pageVars.MLabelEnd}</a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.M}">{$pageVars.MLabelStart}M{$pageVars.MLabelEnd}</a>
         |
-        <a href="./?{$pageVars.url.G}">{$pageVars.GLabelStart}G{$pageVars.GLabelEnd}</a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.G}">{$pageVars.GLabelStart}G{$pageVars.GLabelEnd}</a>
       </th>
       <th>
-        <a href="./?{$pageVars.url.cachePercentASC}"><img border="{$pageVars.cachePercentASCImageBorder}" src="images/up-arrow.gif"></a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.cachePercentASC}"><img border="{$pageVars.cachePercentASCImageBorder}" src="images/up-arrow.gif"></a>
           {$pageVars.cachePercentLabelStart}USO DO CACHE{$pageVars.cachePercentLabelEnd}
-        <a href="./?{$pageVars.url.cachePercentDESC}"><img border="{$pageVars.cachePercentDESCImageBorder}" src="images/down-arrow.gif"></a>
+        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.cachePercentDESC}"><img border="{$pageVars.cachePercentDESCImageBorder}" src="images/down-arrow.gif"></a>
       </th>
     </tr>
   {assign var=recordCount value="0"}
   {assign var=bytesTotal value="0"}
   {foreach from=$pageVars.summaryIPSites item=record}
   <tr onMouseOver="this.bgColor='#C5D3E7';" onMouseOut="this.bgColor='#DAE3F0';">
-    <td style="text-align: center;"><a href="./?a=details&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}&sitesID={$record.sitesID}&usersID={$pageVars.usersID}"><b>Detalhes</b></td>
+    <td style="text-align: center;"><a href="{$smarty.server.PHP_SELF}?a=details&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}&sitesID={$record.sitesID}&usersID={$pageVars.usersID}"><b>Detalhes</b></td>
     <td style="text-align: left;"><a href="{$record.site}" target="_blank">{$record.site}</a></td>
     <td>{$record.bytes|bytesToHRF:$pageVars.byteUnit}</td>
     <td>{$record.cachePercent}%</td>
