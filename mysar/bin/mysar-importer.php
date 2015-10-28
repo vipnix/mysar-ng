@@ -36,7 +36,7 @@ error_reporting(E_ALL);
 debug('Start timestamp is '.$startTime,40,__FILE__,__LINE__);
 debug('Configuration:'.print_r($iniConfig,TRUE),40,__FILE__,__LINE__);
 
-$mysarImporter=getConfigValue('mysarImporter');
+$mysarImporter=getConfigValue($link, 'mysarImporter');
 if($mysarImporter!='enabled') {
 	debug('Importer is disabled. Exiting...',30,__FILE__,__LINE__);
 	debug('',30,__FILE__,__LINE__);
@@ -57,11 +57,11 @@ $inCacheCodes[]='TCP_OFFLINE_HIT';
 
 debug('Getting last proccessed record timestamp...',40,__FILE__,__LINE__);
 $query="SELECT value FROM config WHERE name='lastTimestamp'";
-$recordSet=db_select_one_row($query);
+$recordSet=db_select_one_row($link, $query);
 $lastTimestamp=$recordSet['value'];
 debug($lastTimestamp,40);
 
-$squidLogFile=getConfigValue('squidLogPath');
+$squidLogFile=getConfigValue($link, 'squidLogPath');
 
 debug('Opening log file'.$squidLogFile.'...',40,__FILE__,__LINE__);
 if(!file_exists($squidLogFile)) {
@@ -73,12 +73,12 @@ if(!file_exists($squidLogFile)) {
 $handle = fopen($squidLogFile,"r");
 if(!$handle) {
 	debug('ERROR: Failed opening log file '.$iniConfig['squidLog'],20,__FILE__,__LINE__);
-	my_exit(1);
+	my_exit($link, 1);
 }
 debug('OK',40,__FILE__,__LINE__);
 
 debug('Reading the last log offset...',40,__FILE__,__LINE__);
-$lastLogOffset=getConfigValue('lastLogOffset');
+$lastLogOffset=getConfigValue($link, 'lastLogOffset');
 debug($lastLogOffset,40,__FILE__,__LINE__);
 
 debug('Reading the first log file line...',40,__FILE__,__LINE__);
@@ -86,7 +86,7 @@ $buffer=fgets($handle, 4096);
 $record=preg_split("/\s+/",$buffer);
 debug(print_r($record,TRUE),40,__FILE__,__LINE__);
 
-$firstLogTimestamp=getConfigValue('firstLogTimestamp');
+$firstLogTimestamp=getConfigValue($link, 'firstLogTimestamp');
 if($record['0']==$firstLogTimestamp && $firstLogTimestamp!='') {
 	debug('This is a known log file. Skipping to offset '.$lastLogOffset.'...',40,__FILE__,__LINE__);
 	fseek($handle,$lastLogOffset);
@@ -94,23 +94,33 @@ if($record['0']==$firstLogTimestamp && $firstLogTimestamp!='') {
 } else {
 	debug('This is a new log file.',40,__FILE__,__LINE__);
 	fseek($handle,0);
-	updateConfig('lastLogOffset',0);
-	updateConfig('firstLogTimestamp',$record['0']);
+	updateConfig($link, 'lastLogOffset',0);
+	updateConfig($link, 'firstLogTimestamp',$record['0']);
 }
+//Store current timestamp
+$tims = time();
+//Store Current TimeZone
+$tz = date_default_timezone_get();
+//Switch TimeZone to GMT
+date_default_timezone_set("GMT");
+//Store gmt timestamp
+$gmt = time();
+//Back to defaut timezone
+date_default_timezone_set($tz);
 
-while (($timezone_diff = (gmmktime() - mktime()))%10);
+while (($timezone_diff = ( $gmt - $tims ))%10);
 
 $lastImportedRecordsNumber=0;
 while (!feof($handle)) {
 	debug('Current file offset: '.ftell($handle),40,__FILE__,__LINE__);
 	
-	$timestampNow=mktime();
+	$timestampNow=time();
 	debug('Now timestamp is: '.$timestampNow.'. Script start was at: '.$startTime,40,__FILE__,__LINE__);
 	debug('Checking if run time exceeded '.$maxRunTime.' seconds...',40,__FILE__,__LINE__);
 	if(($timestampNow-$startTime ) > $maxRunTime) {
 		debug('YES',40);
 		debug('Exceeded run time',30,__FILE__,__LINE__);
-		my_exit(0);
+		my_exit($link, 0);
 	}
 	debug('NO',40);
 
@@ -120,7 +130,7 @@ while (!feof($handle)) {
 		debug('Cannot read record. Skipping...',40,__FILE__,__LINE__);
 
 		debug('Updating last known offset to '.ftell($handle).'... ',40,__FILE__,__LINE__);
-		updateConfig('lastLogOffset',ftell($handle));
+		updateConfig($link, 'lastLogOffset',ftell($handle));
 		debug('Done.',40);
 
 		continue;
@@ -138,7 +148,7 @@ while (!feof($handle)) {
 		debug('.',30);
 
 		debug('Updating last known offset to '.ftell($handle).'... ',40,__FILE__,__LINE__);
-		updateConfig('lastLogOffset',ftell($handle));
+		updateConfig($link, 'lastLogOffset',ftell($handle));
 		debug('Done.',40);
 		
 		continue;
@@ -156,7 +166,7 @@ while (!feof($handle)) {
 	$dbRecord['resultCode']=$record[3];
 	$dbRecord['bytes']=$record[4];
 	$dbRecord['url']=addslashes($record[6]);
-	$dbRecord['authuser']=mysql_real_escape_string(substr($record[7],0,50));
+	$dbRecord['authuser']=mysqli_real_escape_string($link, substr($record[7],0,50));
 
 	$resultCodeArray=explode('/',$dbRecord['resultCode']);
 	if(in_array($resultCodeArray[0],$inCacheCodes)) {
@@ -172,7 +182,7 @@ while (!feof($handle)) {
 		debug('YES',40);
 
 		debug('Updating last known offset to '.ftell($handle).'... ',40,__FILE__,__LINE__);
-		updateConfig('lastLogOffset',ftell($handle));
+		updateConfig($link, 'lastLogOffset',ftell($handle));
 		debug('Done.',40);
 		
 		continue;
@@ -187,7 +197,7 @@ while (!feof($handle)) {
 		debug('X',30);
 
 		debug('Updating last known offset to '.ftell($handle).'... ',40,__FILE__,__LINE__);
-		updateConfig('lastLogOffset',ftell($handle));
+		updateConfig($link, 'lastLogOffset',ftell($handle));
 		debug('Done.',40);
 
 		continue;
@@ -197,7 +207,7 @@ while (!feof($handle)) {
 		debug('This a squid-specific poll. Ignoring this record...',40,__FILE__,__LINE__);
 		
 		debug('Updating last known offset to '.ftell($handle).'... ',40,__FILE__,__LINE__);
-		updateConfig('lastLogOffset',ftell($handle));
+		updateConfig($link, 'lastLogOffset',ftell($handle));
 		debug('Done.',40);
 
 		continue;
@@ -219,11 +229,11 @@ while (!feof($handle)) {
 		$query.=',';
 		$query.="'".$dbRecord['authuser']."'";
 		$query.=')';
-	$dbRecord['id']=db_insert($query);
+	$dbRecord['id']=db_insert($link, $query);
 
 	debug('Searching ip '.$dbRecord['ip'].'...',40,__FILE__,__LINE__);
 	$query="SELECT id FROM hostnames WHERE ip=INET_ATON('".$dbRecord['ip']."')";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	if($recordSet['id']=='') {
 		debug('Not found. Inserting to database...',40,__FILE__,__LINE__);
 		$query='INSERT INTO ';
@@ -237,7 +247,7 @@ while (!feof($handle)) {
 		$query.=',';
 		$query.="'".$dbRecord['ip']."'";
 		$query.=')';
-		$hostnamesID=db_insert($query);
+		$hostnamesID=db_insert($link, $query);
 	} else {
 		debug('Found.',40,__FILE__,__LINE__);
 		$hostnamesID=$recordSet['id'];
@@ -261,11 +271,11 @@ while (!feof($handle)) {
 	
 	debug('Searching id of host '.$dbUrl.'...',40,__FILE__,__LINE__);
 	$query="SELECT id FROM sites WHERE date='".$dbRecord['date']."' AND site='".$dbUrl."'";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	if($recordSet['id']=='') {
 		debug('Not found. Inserting to database...',40,__FILE__,__LINE__);
 		$query="INSERT INTO sites(site,date) VALUES ('$dbUrl','".$dbRecord['date']."')";
-		$sitesID=db_insert($query);
+		$sitesID=db_insert($link, $query);
 	} else {
 		debug('Found.',40,__FILE__,__LINE__);
 		$sitesID=$recordSet['id'];
@@ -274,11 +284,11 @@ while (!feof($handle)) {
 
 	debug('Searching id of user '.$dbRecord['authuser'].'...',40,__FILE__,__LINE__);
 	$query="SELECT id FROM users WHERE date='".$dbRecord['date']."' AND authuser='".$dbRecord['authuser']."'";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	if($recordSet['id']=='') {
 		debug('Not found. Inserting to database...',40,__FILE__,__LINE__);
 		$query="INSERT INTO users(authuser,date) VALUES ('".$dbRecord['authuser']."','".$dbRecord['date']."')";
-		$usersID=db_insert($query);
+		$usersID=db_insert($link, $query);
 	} else {
 		debug('Found.',40,__FILE__,__LINE__);
 		$usersID=$recordSet['id'];
@@ -299,7 +309,7 @@ while (!feof($handle)) {
 	$query.="usersID='$usersID'";
 	$query.=" AND ";
 	$query.="summaryTime='".$dbRecord['summaryTime']."'";
-	$affectedRows=db_update($query);
+	$affectedRows=db_update($link, $query);
 	if($affectedRows==0) {
 		debug('Did not update. Trying insert...',40,__FILE__,__LINE__);
 		$query='INSERT INTO trafficSummaries(date,ip,'.$dbRecord['field'].',sitesID,usersID,summaryTime) VALUES (';
@@ -315,7 +325,7 @@ while (!feof($handle)) {
 			$query.=',';
 			$query.="'".$dbRecord['summaryTime']."'";
 			$query.=')';
-		$insertID=db_insert($query);
+		$insertID=db_insert($link, $query);
 		debug('Insert ID is '.$insertID,40,__FILE__,__LINE__);
 	}
 	
@@ -328,15 +338,15 @@ while (!feof($handle)) {
 	$query.="usersID='".$usersID."'";
 	$query.=' WHERE ';
 	$query.="id='".$dbRecord['id']."'";
-	db_update($query,1);
+	db_update($link, $query,1);
 
 	debug('Updating last processed record to '.$record[0].'... ',40,__FILE__,__LINE__);
-	updateConfig('lastTimeStamp',$record[0]);
+	updateConfig($link, 'lastTimeStamp',$record[0]);
 	debug('Done.',40);
 
 	debug('Updating last known offset to '.ftell($handle).'... ',40,__FILE__,__LINE__);
-	updateConfig('lastLogOffset',ftell($handle));
+	updateConfig($link, 'lastLogOffset',ftell($handle));
 	debug('Done.',40);
 }
-my_exit(0);
+my_exit($link, 0);
 ?>
