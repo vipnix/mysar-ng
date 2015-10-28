@@ -9,17 +9,17 @@
 <table>
   <tr><td style="font-size: 20px;">
     {if $pageVars.previousWeekID != ""}
-      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
+      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
 	{/if}
     {if $pageVars.previousDateID != ""}
-      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousDate}&usersID={$pageVars.previousDateID}">&lt;</a>
+      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousDate}&usersID={$pageVars.previousDateID}">&lt;</a>
 	{/if}
     {$pageVars.thisDateFormatted}
     {if $pageVars.nextDateID != ""}
-      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextDate}&usersID={$pageVars.nextDateID}">&gt;</a>
+      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextDate}&usersID={$pageVars.nextDateID}">&gt;</a>
 	{/if}
     {if $pageVars.nextWeekID != ""}
-      <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextWeek}&usersID={$pageVars.nextWeekID}">&gt;&gt;</a>
+      <a href="./?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.nextWeek}&usersID={$pageVars.nextWeekID}">&gt;&gt;</a>
 	{/if}
   </td></tr>
   <tr><td style="text-align:center;">

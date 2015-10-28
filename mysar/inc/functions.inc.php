@@ -55,36 +55,36 @@ function date_timestampFromDbDate($date,$seperator) {
 }
 
 
-function db_delete($query) {
+function db_delete($link, $query) {
 
 	debug('('.$query.') ',50);
-	$recordSet=mysql_query($query);
+	$recordSet=mysqli_query($link, $query);
 	if(!$recordSet) {
-		db_error($query);
+		db_error($link, $query);
 	}
 		
-	$affectedRows=mysql_affected_rows();	
+	$affectedRows=mysqli_affected_rows($link);	
 	debug('Affected rows: '.$affectedRows,50,__FILE__,__LINE__);
 		
 	return($affectedRows);
 	}
 
 
-function db_select_all($query) {
+function db_select_all($link, $query) {
 // select all rows
 	debug('('.$query.') ',40);
 
-	$result=mysql_query($query);
+	$result=mysqli_query($link, $query);
 
 	if(!$result) {
 		debug('SQL Error',20,__FILE__,__LINE__);
-		db_error($query);
+		db_error($link, $query);
 		debug('Exiting...',20,__FILE__,__LINE__);
 		die(1);
 	}
 
 	$allRecords=array();
-	while($row=mysql_fetch_array($result)) {
+	while($row=mysqli_fetch_array($result)) {
 		$allRecords[]=$row;
 	}
 
@@ -92,33 +92,33 @@ function db_select_all($query) {
 }
 
 
-function db_error($query='') {
+function db_error($link, $query='') {
 	// handles the database errors
 
 	debug('ERROR on SQL query',20,__FILE__,__LINE__);
 	if($query!='') {
 		debug('SQL query: '.$query,20,__FILE__,__LINE__);
 	}
-	debug('Database error number: '.mysql_errno(),20,__FILE__,__LINE__);
-	debug('Database error message: '.mysql_error(),20,__FILE__,__LINE__);
+	debug('Database error number: '.mysqli_errno($link),20,__FILE__,__LINE__);
+	debug('Database error message: '.mysqli_error($link),20,__FILE__,__LINE__);
 }
 
 
-function db_update($query,$minimumAffectedRows=0) {
+function db_update($link, $query,$minimumAffectedRows=0) {
 
 	debug('('.$query.')',40,__FILE__,__LINE__);
-	$result=mysql_query($query);
+	$result=mysqli_query($link, $query);
 	if(!$result) {
 		debug('SQL Update Error',20,__FILE__,__LINE__);
-		db_error($query);
+		db_error($link, $query);
 		debug('Exiting...',20,__FILE__,__LINE__);
 		die(1);
 	}
 		
-	$affectedRows=mysql_affected_rows();
+	$affectedRows=mysqli_affected_rows($link);
 	if($affectedRows<$minimumAffectedRows) {
 		debug('SQL Update Error: Less affected rows than expected',20,__FILE__,__LINE__);
-		db_error($query);
+		db_error($link, $query);
 	}
 	
 	debug('Affected rows: '.$affectedRows,40,__FILE__,__LINE__);
@@ -127,9 +127,9 @@ function db_update($query,$minimumAffectedRows=0) {
 }
 
 
-function db_query($query) {
+function db_query($link, $query) {
 	debug('('.$query.')',40,__FILE__,__LINE__);
-	return mysql_query($query);
+	return mysqli_query($link, $query);
 }
 
 function debug($message,$debugLevel='',$file='',$line='') {
@@ -155,29 +155,29 @@ function debug($message,$debugLevel='',$file='',$line='') {
 	}
 }
 
-function getConfigValue($name) {
+function getConfigValue($link, $name) {
 	
 	$query="SELECT value FROM config WHERE name='$name'";
-	$result=db_select_one_row($query);
+	$result=db_select_one_row($link, $query);
 
 	return $result['value'];
 }
 
-function db_select_one_row($query) {
+function db_select_one_row($link, $query) {
 
 	debug('('.$query.')',40,__FILE__,__LINE__);
-	$result=mysql_query($query);
-	$row=@mysql_fetch_array($result);
+	$result=mysqli_query($link, $query);
+	$row=@mysqli_fetch_array($result);
 
 	return $row;
 }
 
 
-function db_select($query) {
-	$result=mysql_query($query);
+function db_select($link, $query) {
+	$result=mysqli_query($link, $query);
 
 	if(!$result) {
-		db_error($query);
+		db_error($link, $query);
 		debug('Exiting...',20,__FILE__,__LINE__);
 		die(1);
 	}
@@ -185,11 +185,11 @@ function db_select($query) {
 	return $result;
 }
 
-function db_fetch_array($result) {
-	if($row=mysql_fetch_array($result)) {
+function db_fetch_array($link, $result) {
+	if($row=mysqli_fetch_array($result)) {
 		return $row;
 	} else {
-echo mysql_error();
+echo mysqli_error($link);
 		return FALSE;
 	}
 }
@@ -207,7 +207,7 @@ function setDefaultView() {
 		$dbValue=$_REQUEST["$value"];
 
 		if($dbValue!='') {
-			updateConfig($dbName,$dbValue);
+			updateConfig($link, $dbName,$dbValue);
 		}
 
 	}
@@ -220,48 +220,48 @@ function errorHandler($line,$error) {
 	exit(1);
 }
 
-function getIpFromIpID($ipID,$date) {
+function getIpFromIpID($link, $ipID,$date) {
 	global $s;
 	
 	$query="SELECT INET_NTOA(ip) AS ip FROM resolvedIPs WHERE id='$ipID' AND date='$date'";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	
 	return $recordSet['ip'];
 }
 
-function getHostnameFromIp($ip) {
+function getHostnameFromIp($link, $ip) {
 	
 	$query="SELECT hostname FROM hostnames WHERE ip='$ip'";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	
 	return $recordSet['hostname'];
 }
 
-function getSiteFromSiteID($sitesID,$date) {
+function getSiteFromSiteID($link, $sitesID,$date) {
 	
 	$query="SELECT id,site FROM sites WHERE id='$sitesID' AND date='$date'";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	return $recordSet['site'];
 }
 
 
-function getHostFromIP($ip,$date) {
+function getHostFromIP($link, $ip,$date) {
 	
 	$query="SELECT id,ip as hostiplong,hostname,description,INET_NTOA(ip) AS ip FROM hostnames WHERE ip='$ip'";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	
 	return $recordSet;
 }
 
 
-function getUserFromUsersID($usersID,$date) {
+function getUserFromUsersID($link, $usersID,$date) {
 	$query="SELECT id,authuser FROM users WHERE id='$usersID' AND date='$date'";
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	
 	return $recordSet;
 }
 	
-function getActiveUsers() {
+function getActiveUsers($link) {
 	global $pageVars,$s;
 	
 	$time=date('H:i:s',$pageVars['lastTimestamp']-600);
@@ -273,7 +273,7 @@ function getActiveUsers() {
 		$query.=" AND ";
 		$query.="time>'$time'";
 	
-	$recordSet=db_select_one_row($query);
+	$recordSet=db_select_one_row($link, $query);
 	
 	return $recordSet['users'];
 }
@@ -307,17 +307,17 @@ function addParameter($url,$newParameter,$newValue) {
 }
 	
 
-function db_insert($query) {
+function db_insert($link, $query) {
 
 	debug('('.$query.') ',50);
-	$result=mysql_query($query);
+	$result=mysqli_query($link, $query);
 	if(!$result) {
-		db_error($query);
+		db_error($link, $query);
 		debug('Exiting...',20,__FILE__,__LINE__);
 		die(1);
 	}
 		
-	$insertID=mysql_insert_id();
+	$insertID=mysqli_insert_id($link);
 	debug('Insert ID: '.$insertID,40,__FILE__,__LINE__);
 		
 	return $insertID;
@@ -327,10 +327,10 @@ function updateLastTimestamp($timestamp) {
 	
 	$query="UPDATE config SET value='$timestamp' WHERE name='lastTimestamp'";
 	debug('Updating lastTimestamp...',40,__FILE__,__LINE__);
-	db_update($query);
+	db_update($link, $query);
 }
 
-function updateConfig($name,$value) {
+function updateConfig($link, $name,$value) {
 	
 	debug("Updating config value $name to $value...",40,__FILE__,__LINE__);
 
@@ -340,13 +340,13 @@ function updateConfig($name,$value) {
 	$query.='config';
 	$query.=' WHERE ';
 	$query.="name='".$name."'";
-	$result=mysql_query($query);
+	$result=mysqli_query($link, $query);
 	if($result) {
-		$numrows=mysql_num_rows($result);
+		$numrows=mysqli_num_rows($result);
 	}
 	if($numrows>0) {
 		$query="UPDATE config SET value='".$value."' WHERE name='".$name."'";
-		db_update($query);
+		db_update($link, $query);
 	} else {
 		$query='INSERT INTO ';
 		$query.='config';
@@ -359,7 +359,7 @@ function updateConfig($name,$value) {
 		$query.=',';
 		$query.="'".$value."'";
 		$query.=')';
-		db_insert($query);
+		db_insert($link, $query);
 	}
 }
 
@@ -408,12 +408,12 @@ function url_createSortParameters($url,$validParameters) {
 
 
 
-function my_exit($errorCode) {
+function my_exit($link, $errorCode) {
 	global $lastImportedRecordsNumber,$record,$s;
 	
 	debug($lastImportedRecordsNumber.' records processed',30,__FILE__,__LINE__);
-	updateConfig('lastTimeStamp',$record[0]);
-	updateConfig('lastImportedRecordsNumber',$lastImportedRecordsNumber);
+	updateConfig($link, 'lastTimeStamp',$record[0]);
+	updateConfig($link, 'lastImportedRecordsNumber',$lastImportedRecordsNumber);
 	debug("\n",30,__FILE__,__LINE__);
 
 	exit($errorCode);

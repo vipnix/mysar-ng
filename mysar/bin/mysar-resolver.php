@@ -20,7 +20,7 @@
 
 
 # record start time, to stop execution if time is exceeded...
-$startTime=mktime();
+$startTime=time();
 $yesterdayTimestamp=$startTime-86400;
 
 // calculate the base path of the program
@@ -33,7 +33,7 @@ $DEBUG_LEVEL='30';
 require($basePath.'/inc/common.inc.php');
 
 debug('Checking whether resolving is enabled...',40,__FILE__,__LINE__);
-$resolveClients=getConfigValue('resolveClients');
+$resolveClients=getConfigValue($link, 'resolveClients');
 if($resolveClients!='enabled') {
 	debug('Resolving is NOT enabled. Exiting...',30,__FILE__,__LINE__);
 	exit(0);
@@ -57,15 +57,15 @@ $query.=' WHERE ';
 $query.="isResolved='0'";
 $query.=' ORDER BY id ASC';
 
-$result=db_select($query);
-while($row=db_fetch_array($result)) {
-	$timestampNow=mktime();
+$result=db_select($link, $query);
+while($row=db_fetch_array($link, $result)) {
+	$timestampNow=time();
 	debug('Now timestamp is: '.$timestampNow.'. Script start was at: '.$startTime,40,__FILE__,__LINE__);
 	debug('Checking if run time exceeded '.$maxRunTime.' seconds...',40,__FILE__,__LINE__);
 	if(($timestampNow-$startTime ) > $maxRunTime) {
 		debug('YES',40);
 		debug('Exceeded run time',30,__FILE__,__LINE__);
-		my_exit(0);
+		my_exit($link, 0);
 	}
 	debug('NO',40);
 
@@ -78,12 +78,12 @@ while($row=db_fetch_array($result)) {
 	$query.="isResolved='1'";
 	$query.=' WHERE ';
 	$query.="id='".$row['id']."'";
-	db_update($query,1);
+	db_update($link, $query,1);
 	debug('.',30);
 }
 	
 debug('Updating last resolver timestamp...',40,__FILE__,__LINE__);
-$query="UPDATE config SET value='".mktime()."' WHERE name='lastResolve'";
-db_update($query);
+$query="UPDATE config SET value='".time()."' WHERE name='lastResolve'";
+db_update($link, $query);
 echo "\n";
 ?>

@@ -46,20 +46,18 @@ if($DEBUG_MODE=='cmd') {
 // Initialize the database connection
 debug('Initializing database connection...',40,__FILE__,__LINE__);
 debug('dbHost='.$iniConfig['dbHost'].',dbUser='.$iniConfig['dbUser'].',dbPass='.$iniConfig['dbPass'],40,__FILE__,__LINE__);
-$link=mysql_connect($iniConfig['dbHost'],$iniConfig['dbUser'],$iniConfig['dbPass'],FALSE,2);
+$link=mysqli_connect($iniConfig['dbHost'],$iniConfig['dbUser'],$iniConfig['dbPass']);
 if (!$link) {
-	debug('Error connecting to database!',20,__FILE__,__LINE__);
-	db_error();
-	debug('FATAL. Exiting...',20,__FILE__,__LINE__);
-	die(1);
+    die('Erreur de connexion (' . mysqli_connect_errno() . ') '
+            . mysqli_connect_error());
 }
 debug('Done.',40,__FILE__,__LINE__);
 debug('Selecting database...',40,__FILE__,__LINE__);
 debug('dbName='.$iniConfig['dbName'],40,__FILE__,__LINE__);
-$result=mysql_select_db($iniConfig['dbName']);
+$result=mysqli_select_db($link, $iniConfig['dbName']);
 if(!$result) {
 	debug('Could not select database!',40,__FILE__,__LINE__);
-	db_error();
+	db_error($link);
 	debug('FATAL. Exiting...',20,__FILE__,__LINE__);
 	die(1);
 }
@@ -67,14 +65,14 @@ debug('Done.',40,__FILE__,__LINE__);
 
 // Identification
 define('PROGRAM_NAME_SHORT','mysar');
-define('PROGRAM_NAME_LONG','Relatórios de internet diário');
+define('PROGRAM_NAME_LONG','MySQL Squid Access Report');
 define('PROGRAM_VERSION','');
 
 if($DEBUG_MODE=='web') {
 // Initialize smarty template engine
 	require($basePath.'/inc/smarty/Smarty.class.php');
 	$smarty=new Smarty;
-	$smarty->template_dir=$basePath.'/www-templates';
+	$smarty->template_dir=$basePath.'/www-templates.fr_FR';
 	$smarty->compile_dir=$basePath.'/smarty-tmp';
 	$smarty->debugging = false;
 }
