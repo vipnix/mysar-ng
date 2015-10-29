@@ -146,7 +146,7 @@ switch($a_switch) {
 		$pageVars[$pageVars['ByteUnit'].'LabelEnd']='</u>';
 		
 		$query='SELECT ';
-		$query.='INET_NTOA(trafficSummaries.ip) AS hostip';
+		$query.='INET6_NTOA(UNHEX(trafficSummaries.ip)) AS hostip';
 		$query.=',';
 		$query.='trafficSummaries.ip AS hostiplong';
 		$query.=',';
@@ -191,7 +191,7 @@ switch($a_switch) {
 		$pageVars['distinctValues']=db_select_one_row($link, $query);
 		
 		$query='SELECT ';
-		$query.='INET_NTOA(traffic.ip) AS hostip';
+		$query.='INET6_NTOA(UNHEX(traffic.ip)) AS hostip';
 		$query.=',';
 		$query.='traffic.ip AS hostiplong';
 		$query.=',';
@@ -394,7 +394,7 @@ switch($a_switch) {
 		$pageVars['summaryIPSites']=db_select_all($link, $query);
 		
 		$query='SELECT ';
-		$query.='INET_NTOA(traffic.ip) AS hostip';
+		$query.='INET6_NTOA(UNHEX(traffic.ip)) AS hostip';
 		$query.=',';
 		$query.='traffic.ip AS hostiplong';
 		$query.=',';
@@ -609,7 +609,7 @@ switch($a_switch) {
 		$query='SELECT ';
 		$query.='trafficSummaries.ip AS hostiplong';
 		$query.=',';
-		$query.='INET_NTOA(hostnames.ip) AS hostip';
+		$query.='INET6_NTOA(UNHEX(hostnames.ip)) AS hostip';
 		$query.=',';
 		$query.='hostnames.hostname AS hostname';
 		$query.=',';
@@ -649,7 +649,7 @@ switch($a_switch) {
 		$pageVars['distinctValues']=db_select_one_row($link, $query);
 		
 		$query='SELECT ';
-		$query.='INET_NTOA(traffic.ip) AS hostip';
+		$query.='INET6_NTOA(UNHEX(traffic.ip)) AS hostip';
 		$query.=',';
 		$query.='traffic.ip AS hostiplong';
 		$query.=',';

@@ -223,7 +223,7 @@ function errorHandler($line,$error) {
 function getIpFromIpID($link, $ipID,$date) {
 	global $s;
 	
-	$query="SELECT INET_NTOA(ip) AS ip FROM resolvedIPs WHERE id='$ipID' AND date='$date'";
+	$query="SELECT INET6_NTOA(UNHEX(ip)) AS ip FROM resolvedIPs WHERE id='$ipID' AND date='$date'";
 	$recordSet=db_select_one_row($link, $query);
 	
 	return $recordSet['ip'];
@@ -247,7 +247,7 @@ function getSiteFromSiteID($link, $sitesID,$date) {
 
 function getHostFromIP($link, $ip,$date) {
 	
-	$query="SELECT id,ip as hostiplong,hostname,description,INET_NTOA(ip) AS ip FROM hostnames WHERE ip='$ip'";
+	$query="SELECT id,ip as hostiplong,hostname,description,INET6_NTOA(UNHEX(ip)) AS ip FROM hostnames WHERE ip='$ip'";
 	$recordSet=db_select_one_row($link, $query);
 	
 	return $recordSet;
