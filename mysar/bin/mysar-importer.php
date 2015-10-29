@@ -219,7 +219,7 @@ while (!feof($handle)) {
 		$query.=',';
 		$query.="'".$dbRecord['time']."'";
 		$query.=',';
-		$query.="INET_ATON('".$dbRecord['ip']."')";
+		$query.="HEX(INET6_ATON('".$dbRecord['ip']."'))";
 		$query.=',';
 		$query.="'".$dbRecord['resultCode']."'";
 		$query.=',';
@@ -232,7 +232,7 @@ while (!feof($handle)) {
 	$dbRecord['id']=db_insert($link, $query);
 
 	debug('Searching ip '.$dbRecord['ip'].'...',40,__FILE__,__LINE__);
-	$query="SELECT id FROM hostnames WHERE ip=INET_ATON('".$dbRecord['ip']."')";
+	$query="SELECT id FROM hostnames WHERE ip=HEX(INET6_ATON('".$dbRecord['ip']."'))";
 	$recordSet=db_select_one_row($link, $query);
 	if($recordSet['id']=='') {
 		debug('Not found. Inserting to database...',40,__FILE__,__LINE__);
@@ -243,7 +243,7 @@ while (!feof($handle)) {
 		$query.=',';
 		$query.='hostname';
 		$query.=') VALUES (';
-		$query.="INET_ATON('".$dbRecord['ip']."')";
+		$query.="HEX(INET6_ATON('".$dbRecord['ip']."'))";
 		$query.=',';
 		$query.="'".$dbRecord['ip']."'";
 		$query.=')';
@@ -302,7 +302,7 @@ while (!feof($handle)) {
 	$query.=' WHERE ';
 	$query.="date='".$dbRecord['date']."'";
 	$query.=" AND ";
-	$query.="ip=INET_ATON('".$dbRecord['ip']."')";
+	$query.="ip=HEX(INET6_ATON('".$dbRecord['ip']."'))";
 	$query.=" AND ";
 	$query.="sitesID='$sitesID'";
 	$query.=" AND ";
@@ -315,7 +315,7 @@ while (!feof($handle)) {
 		$query='INSERT INTO trafficSummaries(date,ip,'.$dbRecord['field'].',sitesID,usersID,summaryTime) VALUES (';
 			$query.="'".$dbRecord['date']."'";
 			$query.=',';
-			$query.="INET_ATON('".$dbRecord['ip']."')";
+			$query.="HEX(INET6_ATON('".$dbRecord['ip']."'))";
 			$query.=',';
 			$query.="'".$dbRecord['bytes']."'";
 			$query.=',';

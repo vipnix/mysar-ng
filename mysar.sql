@@ -48,7 +48,7 @@ DROP TABLE IF EXISTS `hostnames`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `hostnames` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `ip` int(10) unsigned NOT NULL DEFAULT '0',
+  `ip` varbinary(32) NOT NULL DEFAULT '0',,
   `description` varchar(50) NOT NULL DEFAULT '',
   `isResolved` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `hostname` varchar(255) NOT NULL DEFAULT '',
@@ -104,7 +104,7 @@ CREATE TABLE `traffic` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `date` date NOT NULL DEFAULT '0000-00-00',
   `time` time NOT NULL DEFAULT '00:00:00',
-  `ip` int(10) unsigned NOT NULL DEFAULT '0',
+  `ip` varbinary(32) NOT NULL DEFAULT '0',,
   `resultCode` varchar(50) NOT NULL DEFAULT '',
   `bytes` bigint(20) unsigned NOT NULL DEFAULT '0',
   `url` varchar(255) NOT NULL DEFAULT '',
@@ -135,7 +135,7 @@ DROP TABLE IF EXISTS `trafficSummaries`;
 CREATE TABLE `trafficSummaries` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `date` date NOT NULL DEFAULT '0000-00-00',
-  `ip` int(10) unsigned NOT NULL DEFAULT '0',
+  `ip` varbinary(32) NOT NULL DEFAULT '0',,
   `usersID` bigint(20) unsigned NOT NULL DEFAULT '0',
   `inCache` bigint(20) unsigned NOT NULL DEFAULT '0',
   `outCache` bigint(20) unsigned NOT NULL DEFAULT '0',
