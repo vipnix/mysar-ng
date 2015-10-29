@@ -8,8 +8,8 @@ h1. MYSAR-ng Handbook
 
 h2. Requirements:
 
-<pre><code>Apache
-Mysql
+<pre><code>Apache or Nginx
+Mysql 5.6 or mire
 GCC</code></pre>
 
 h2. Installation:
@@ -52,7 +52,7 @@ h4. 2.2- Import default database:
 <pre><code>mysql mysar < /opt/mysar-ng/mysar.sql </code></pre>
 
 
-h3. 3- Compile Binary importer
+h3. 3- Compile Binary importer /!\ Binary doesn't work anymore, i will upgrade it soon /!\
 
 <pre><code>cd /srv/www/htdocs/mysar/bin/mysar-binary-importer/ ; make clean && make && make install</code></pre>
 
