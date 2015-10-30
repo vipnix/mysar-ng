@@ -4,9 +4,9 @@
 <a href="{$pageVars.uri}">Refresh this page</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px";>Sites Summary for a Specific Host, User and Date</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Sites Summary for a Specific Host, User and Date</th></tr></table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
     {if $pageVars.previousWeekID != ""}
       <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
@@ -25,9 +25,9 @@
   <tr><td style="text-align:center;">
     <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.today}&usersID={$pageVars.usersID}">[ Go to today ]</a>
   </td></tr>
-</table>
+</table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><th colspan="2">Information box</th></tr>
   <form method="POST">
   <input type="hidden" name="hiddenSubmit" value="1">
@@ -43,14 +43,14 @@
   <tr><td>Host Description</td><td style="text-align:left;"><input type="text" name="thisValue" value="{$pageVars.host.description}"</td></tr>
   <tr><td>User Name</td><td style="text-align:left;">{$pageVars.user.authuser}</tr>
   </form>
-</table>
+</table></div>
 <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.ByteUnit}&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}">
           Set this view as the default
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th></th>
       <th>
@@ -95,9 +95,9 @@
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.ByteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-    <table>
+    <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">Latest user activity</th></td>
     <tr>
       <th>TIME</th>
@@ -113,5 +113,5 @@
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 

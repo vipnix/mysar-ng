@@ -4,9 +4,10 @@
 <a href="{$pageVars.uri}">Actualiser cette page</a>
 ]</nobr>
 &eac
-<table><tr><th style="font-size: 20px";>Rapport des sites concult&eacute;es pour un jour donn&eacute;e</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Rapport des sites concult&eacute;es pour un jour donn&eacute;e</th></tr></table></div>
 <p>
-<table>
+{$pageVars.uri} et {$smarty.server.PHP_SELF}
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousWeek}">&lt;&lt;</a>
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousDate}">&lt;</a>
@@ -17,14 +18,14 @@
   <tr><td style="text-align:center;">
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.today}">[ Aller &agrave; aujourd'hui ]</a>
   </td></tr>
-  </table>
+  </table></div>
   <p>
       [
         <a href="{$pageVars.uri}&action=setDefaultView">
           D&eacute;;finir cette vu, comme vu par d&eacute;fault
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th></th>
       <th>
@@ -72,4 +73,4 @@
     <td>{$record.cachePercent}%</td>
   </tr>
   {/foreach}
-  </table>
+  </table></div>

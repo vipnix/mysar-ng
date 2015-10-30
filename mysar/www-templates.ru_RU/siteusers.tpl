@@ -4,21 +4,21 @@
 <a href="{$pageVars.uri}">Обновить страницу</a>
 ]</nobr>
 
-  <table><tr><th style="font-size: 20px";>Статистика посещений для Хостов и Пользователей за день</th></tr></table>
+  <div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Статистика посещений для Хостов и Пользователей за день</th></tr></table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
     {$pageVars.thisDateFormatted}
   </td></tr>
-</table>
+</table></div>
 
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><th colspan="2">Дополнительная информация</th></tr>
   <form method="POST">
   <tr><td>Сайт</td><td style="text-align:left;"><a href="{$pageVars.site}" target="_blank">{$pageVars.site}</a></td></tr>
   </form>
-</table>
+</table></div>
 
   <p>
       [
@@ -26,7 +26,7 @@
           Установить вид по-умолчанию
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th>
         <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.hostipASC}"><img border="{$pageVars.hostipASCImageBorder}" src="images/up-arrow.gif"></a>
@@ -88,9 +88,9 @@
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.byteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">Latest site activity</th></td>
     <tr>
       <th>IP-адрес Хоста</th>
@@ -110,5 +110,5 @@
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 

@@ -4,10 +4,10 @@
 <a href="{$pageVars.uri}">Actualiser cette page</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px";>Rapport sp&egrave; pour un ordinateur, un utilisateur ou une date</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Rapport sp&egrave; pour un ordinateur, un utilisateur ou une date</th></tr></table></div>
 <p>
-<table>
-  <tr><td style="font-size: 20px;">
+<div class="table-responsive"><table class="table table-condensed">
+  <tr><td style="font-size: 20px;" class="center">
     {if $pageVars.previousWeekID != ""}
       <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
 	{/if}
@@ -25,9 +25,9 @@
   <tr><td style="text-align:center;">
     <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.today}&usersID={$pageVars.usersID}">[ Retour Aujourd'hui ]</a>
   </td></tr>
-</table>
+</table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><th colspan="2">Boite d'information</th></tr>
   <form method="POST">
   <input type="hidden" name="hiddenSubmit" value="1">
@@ -43,14 +43,14 @@
   <tr><td>Description de l'ordinateur</td><td style="text-align:left;"><input type="text" name="thisValue" value="{$pageVars.host.description}"</td></tr>
   <tr><td>Nom d'utilisateur</td><td style="text-align:left;">{$pageVars.user.authuser}</tr>
   </form>
-</table>
+</table></div>
 <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.byteUnit}&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}">
           D&eacute;;finir cette vu, comme vu par d&eacute;fault
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th></th>
       <th>
@@ -95,9 +95,9 @@
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.byteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-    <table>
+    <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">Dernier utilisateur en activit&egrave;</th></td>
     <tr>
       <th>Temps</th>
@@ -113,5 +113,5 @@
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 
