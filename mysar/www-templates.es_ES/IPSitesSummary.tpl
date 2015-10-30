@@ -4,9 +4,9 @@
 <a href="{$pageVars.uri}">Atualizar esta p&aacute;gina</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px";>Relat&oacute;rio de uma Esta&ccedil;&atilde;o, Usu&aacute;rio e Data</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Relat&oacute;rio de uma Esta&ccedil;&atilde;o, Usu&aacute;rio e Data</th></tr></table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
     {if $pageVars.previousWeekID != ""}
       <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
@@ -25,9 +25,9 @@
   <tr><td style="text-align:center;">
     <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.today}&usersID={$pageVars.usersID}">[ Ir para o dia de Hoje ]</a>
   </td></tr>
-</table>
+</table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><th colspan="2">Informa&ccedil;&otilde;es da Esta&ccedil;&atilde;o</th></tr>
   <form method="POST">
   <input type="hidden" name="hiddenSubmit" value="1">
@@ -43,14 +43,14 @@
   <tr><td>Descri&ccedil;&atilde;o</td><td style="text-align:left;"><input type="text" name="thisValue" value="{$pageVars.host.description}"</td></tr>
   <tr><td>Nome Usu&aacute;rio</td><td style="text-align:left;">{$pageVars.user.authuser}</tr>
   </form>
-</table>
+</table></div>
 <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.byteUnit}&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}">
           Manter esta visualiza&ccedil;&atilde;o como padr&atilde;o
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th></th>
       <th>
@@ -95,9 +95,9 @@
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.byteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-    <table>
+    <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">&Uacute;ltimas Atividades do Usu&aacute;rio</th></td>
     <tr>
       <th>HORA</th>
@@ -113,5 +113,5 @@
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 

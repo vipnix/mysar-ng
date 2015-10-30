@@ -4,10 +4,10 @@
 <a href="{$pageVars.uri}">Atualizar esta p&aacute;gina</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px;">Relat&oacute;rio de Esta&ccedil;&otilde;es e Usu&aacute;rios de Um dia</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px;">Relat&oacute;rio de Esta&ccedil;&otilde;es e Usu&aacute;rios de Um dia</th></tr></table></div>
 <p>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousWeek}" title="Voltar 1 Semana">&lt;&lt;</a>
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousDate}" title="Voltar 1 Dia">&lt;</a>
@@ -18,7 +18,7 @@
   <tr><td style="text-align:center;">
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.today}" title="Dia de Hoje">[ Ir para o dia de Hoje ]</a>
   </td></tr>
-  </table>
+  </table></div>
 <p>
 [ <a href="{$smarty.server.PHP_SELF}?a=allsites&date={$pageVars.date}" title="Lista de sites que foram acessados">Visualizar TODOS os sites acessados Neste dia</a> ]
 
@@ -28,7 +28,7 @@
           Manter esta visualiza&ccedil;&atilde;o como padr&atilde;o
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th></th>
       <th>
@@ -95,9 +95,9 @@
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.ByteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">&Uacute;ltimas Atividades do Usu&aacute;rio</th></td>
     <tr>
       <th>IP ESTA&Ccedil;&Atilde;O</th>
@@ -117,5 +117,5 @@
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 </center>

@@ -4,10 +4,10 @@
 <a href="{$pageVars.uri}">Обновить страницу</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px;">Статистика Хостов и Пользователей за день</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px;">Статистика Хостов и Пользователей за день</th></tr></table></div>
 <p>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousWeek}" title="Go back a week">&lt;&lt;</a>
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousDate}" title="Go back a day">&lt;</a>
@@ -18,7 +18,7 @@
   <tr><td style="text-align:center;">
   <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.today}" title="Go to today's report">[ Перейти к сегодняшнему дню ]</a>
   </td></tr>
-  </table>
+  </table></div>
 <p>
 [ <a href="{$smarty.server.PHP_SELF}?a=allsites&date={$pageVars.date}" title="List of all the different sites that were visited">Статистика посещений за день</a> ]
 
@@ -28,7 +28,7 @@
           Установить вид по-умолчанию
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th></th>
       <th>
@@ -95,9 +95,9 @@
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.ByteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">Последняя активность Пользователей</th></td>
     <tr>
       <th>Хост</th>
@@ -117,5 +117,5 @@
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 </center>

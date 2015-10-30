@@ -2,7 +2,7 @@
 <a href="{$pageVars.uri}">Atualizar esta p&aacute;gina</a>
 ]</nobr>
 
-      <table><tr><th style="font-size: 20px";>Relat&oacute;rio de Acesso por dia</th></tr></table>
+      <div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Relat&oacute;rio de Acesso por dia</th></tr></table></div>
       <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.OrderMethod}&OrderBy={$pageVars.OrderBy}&ByteUnit={$pageVars.ByteUnit}">
@@ -64,4 +64,4 @@
           <td style="text-align: center;">{$date.cachePercent}%</td>
         </tr>
       {/foreach}
-      </table>
+      </table></div>

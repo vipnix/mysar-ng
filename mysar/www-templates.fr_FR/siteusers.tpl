@@ -5,21 +5,21 @@ Retour "Rapport des utilisateurs et collaborateur pour un jour donn&eacute;e
 <a href="{$pageVars.uri}">Refresh this page</a>
 ]</nobr>
 
-  <table><tr><th style="font-size: 20px";>R&eacute;sum&eacute; utilsateur ou ordinateur pour un jour ou un site sp&eacute; donn&eacute;</th></tr></table>
+  <div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>R&eacute;sum&eacute; utilsateur ou ordinateur pour un jour ou un site sp&eacute; donn&eacute;</th></tr></table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
     {$pageVars.thisDateFormatted}
   </td></tr>
-</table>
+</table></div>
 
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><th colspan="2">Boite d'information</th></tr>
   <form method="POST">
   <tr><td>Site</td><td style="text-align:left;"><a href="{$pageVars.site}" target="_blank">{$pageVars.site}</a></td></tr>
   </form>
-</table>
+</table></div>
 
   <p>
       [
@@ -27,7 +27,7 @@ Retour "Rapport des utilisateurs et collaborateur pour un jour donn&eacute;e
           D&eacute;;finir cette vu, comme vu par d&eacute;fault
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th>
         <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.hostipASC}"><img border="{$pageVars.hostipASCImageBorder}" src="images/up-arrow.gif"></a>
@@ -89,9 +89,9 @@ Retour "Rapport des utilisateurs et collaborateur pour un jour donn&eacute;e
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.byteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">Derni&eacute activit&eacute; d'un site</th></td>
     <tr>
       <th>Adresse IP</th>
@@ -111,5 +111,5 @@ Retour "Rapport des utilisateurs et collaborateur pour un jour donn&eacute;e
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 

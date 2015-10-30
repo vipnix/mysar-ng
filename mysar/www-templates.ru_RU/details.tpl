@@ -4,24 +4,24 @@
 <a href="{$pageVars.uri}">Обновить страницу</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px";>Статистика посещений для Хостов, Пользователей по Датам</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Статистика посещений для Хостов, Пользователей по Датам</th></tr></table></div>
 <p>
-<table><tr><td style="font-size: 20px;">{$pageVars.thisDateFormatted}</td></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><td style="font-size: 20px;">{$pageVars.thisDateFormatted}</td></tr></table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td>Имя Хоста</td><td style="text-align:left;">{$pageVars.host.hostname}</td></tr>
   <tr><td>IP-адрес Хоста</td><td style="text-align:left;">{$pageVars.host.ip}</td></tr>
   <tr><td>Описание Хоста</td><td style="text-align:left;">{$pageVars.host.description}</td></tr>
   <tr><td>Имя пользователя Squid</td><td style="text-align:left;">{$pageVars.user.authuser}</tr>
   <tr><td>Сайт</td><td style="text-align:left;"><a href="{$pageVars.site}" target="_blank">{$pageVars.site}</a></tr>
-</table>
+</table></div>
 <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.byteUnit}&date={$pageVars.date}&ipID={$pageVars.ipID}&siteID={$pageVars.siteID}">
           Установить вид по-умолчанию
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th>
         <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.timeASC}"><img border="{$pageVars.timeASCImageBorder}" src="images/up-arrow.gif"></a>
@@ -60,4 +60,4 @@
     <td style="text-align: left;">{$record.resultCode}</td>
   </tr>
   {/foreach}
-  </table>
+  </table></div>

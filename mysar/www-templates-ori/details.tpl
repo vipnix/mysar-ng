@@ -4,24 +4,24 @@
 <a href="{$pageVars.uri}">Refresh this page</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px";>Details for a Specific Host, User, Date and Site</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Details for a Specific Host, User, Date and Site</th></tr></table></div>
 <p>
-<table><tr><td style="font-size: 20px;">{$pageVars.thisDateFormatted}</td></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><td style="font-size: 20px;">{$pageVars.thisDateFormatted}</td></tr></table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td>Host Name</td><td style="text-align:left;">{$pageVars.host.hostname}</td></tr>
   <tr><td>Host IP</td><td style="text-align:left;">{$pageVars.host.ip}</td></tr>
   <tr><td>Host Description</td><td style="text-align:left;">{$pageVars.host.description}</td></tr>
   <tr><td>User Name</td><td style="text-align:left;">{$pageVars.user.authuser}</tr>
   <tr><td>Site</td><td style="text-align:left;"><a href="{$pageVars.site}" target="_blank">{$pageVars.site}</a></tr>
-</table>
+</table></div>
 <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.ByteUnit}&date={$pageVars.date}&ipID={$pageVars.ipID}&siteID={$pageVars.siteID}">
           Set this view as the default
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th>
         <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.timeASC}"><img border="{$pageVars.timeASCImageBorder}" src="images/up-arrow.gif"></a>
@@ -60,4 +60,4 @@
     <td style="text-align: left;">{$record.resultCode}</td>
   </tr>
   {/foreach}
-  </table>
+  </table></div>

@@ -2,7 +2,7 @@
 <a href="{$pageVars.uri}">Actualiser cette page</a>
 ]</nobr>
 
-      <table><tr><th style="font-size: 20px";>{$pageVars.topGrouping} R&eacute;sum&eacute</th></tr></table>
+      <div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>{$pageVars.topGrouping} R&eacute;sum&eacute</th></tr></table></div>
       <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.OrderMethod}&OrderBy={$pageVars.OrderBy}&ByteUnit={$pageVars.ByteUnit}">
@@ -10,7 +10,7 @@
         </a>
       ]
       <br>
-      <table cellpadding=1 cellspacing=1>
+      <table cellpadding=1 cellspacing=1 class="table table-consensed">
         <tr>
           <th rowspan="2">
             <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.dateASC}"><img border="{$pageVars.dateASCImageBorder}" src="images/up-arrow.gif"></a>
@@ -77,4 +77,4 @@
           <td style="text-align: center;">{$date.cachePercent}%</td>
         </tr>
       {/foreach}
-      </table>
+      </table></div>

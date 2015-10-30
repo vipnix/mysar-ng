@@ -1,6 +1,6 @@
-      <table><tr><th style="font-size: 20px";>Administration</th></tr></table>
+      <table clas="table table-condensed"><tr><th style="font-size: 20px";>Administration</th></tr></table></div>
       <p>
-      <table>
+      <div class="table-responsive"><table class="table table-condensed">
         <form method="POST">
         <input type="hidden" name="hiddenSubmit" value="1">
         <input type="hidden" name="configName" value="keepHistoryDays">
@@ -114,5 +114,5 @@
         </td>
       </tr>
       
-      </table>
+      </table></div>
       

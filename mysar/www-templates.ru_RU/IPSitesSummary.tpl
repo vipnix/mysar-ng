@@ -4,9 +4,9 @@
 <a href="{$pageVars.uri}">Обновить страницу</a>
 ]</nobr>
 
-<table><tr><th style="font-size: 20px";>Статистика посещений для Хостов и Пользователей за день</th></tr></table>
+<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Статистика посещений для Хостов и Пользователей за день</th></tr></table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
     <a href="{$smarty.server.PHP_SE
     {if $pageVars.previousWeekID != ""}
@@ -26,9 +26,9 @@
   <tr><td style="text-align:center;">
     <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.today}&usersID={$pageVars.usersID}">[ Перейти к сегодняшнему дню ]</a>
   </td></tr>
-</table>
+</table></div>
 <p>
-<table>
+<div class="table-responsive"><table class="table table-condensed">
   <tr><th colspan="2">Дополнительная информация</th></tr>
   <form method="POST">
   <input type="hidden" name="hiddenSubmit" value="1">
@@ -44,14 +44,14 @@
   <tr><td>Описание Хоста</td><td style="text-align:left;"><input type="text" name="thisValue" value="{$pageVars.host.description}"</td></tr>
   <tr><td>Имя пользователя Squid</td><td style="text-align:left;">{$pageVars.user.authuser}</tr>
   </form>
-</table>
+</table></div>
 <p>
       [
         <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.orderMethod}&OrderBy={$pageVars.orderBy}&ByteUnit={$pageVars.byteUnit}&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}">
           Установить вид по-умолчанию
         </a>
       ]
-  <table>
+  <div class="table-responsive"><table class="table table-condensed">
     <tr>
       <th></th>
       <th>
@@ -96,9 +96,9 @@
       <th style="text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.byteUnit}</th>
       <th></th>
     </tr>
-  </table>
+  </table></div>
   <p>
-    <table>
+    <div class="table-responsive"><table class="table table-condensed">
     <tr><th colspan="7">Последняя активность Пользователя</th></td>
     <tr>
       <th>Время</th>
@@ -114,5 +114,5 @@
       <td style="text-align: left">{$record.resultCode}</td>
     </tr>
     {/foreach}
-  </table>
+  </table></div>
 

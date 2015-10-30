@@ -6,9 +6,12 @@ BODY {
 	margin-top:0px;
 }
 
-TABLE {
-	border: 1px solid black;
+.table{
+	width: 50%;
 	background-color: #DAE3F0;
+}
+.center{
+	text-align: center;
 }
 TH {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
