@@ -7,8 +7,10 @@ BODY {
 }
 
 .table{
-	width: 50%;
-	background-color: #DAE3F0;
+        width: 50%;
+        background-color: #DAE3F0;
+        margin-left: auto;
+        margin-right: auto;
 }
 .center{
 	text-align: center;
