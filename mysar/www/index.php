@@ -792,11 +792,19 @@ foreach ( $pageVars as $key => $value ) {
 		foreach ( $value as $key2 => $value2 ) {
 			if (is_array ( $value2 )) {
 				foreach ( $value2 as $key3 => $value3 ) {
-					if (($key3 == "url" && ! is_numeric ( $key3 )) or ($key3 == "site" && ! is_numeric ( $key3 ))) {
-						$pageVars [$key] [$key2] [$key3] = encrypt_decrypt ( 'decrypt', $value3, $iniConfig ['key'] );
+					if (($key3 == "url" && ! is_numeric ( $key3 )) or ($key3 == "site" && ! is_numeric ( $key3 )) or ($key3 == 2)) {
+						//echo "@".$pageVars [$key] [$key2] [$key3]."@".$iniConfig ['key']."\n";
+						$pageVars [$key] [$key2] [$key3] = encrypt_decrypt ( 'decrypt', $pageVars [$key] [$key2] [$key3], $iniConfig ['key'] );
+						
+
 					}
 				}
 			}
+		}
+	}else{
+		if($key == "site")
+		{
+		 $pageVars[$key] = encrypt_decrypt ( 'decrypt', $pageVars [$key], $iniConfig ['key'] );
 		}
 	}
 }

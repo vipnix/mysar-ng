@@ -369,11 +369,11 @@ function string_trim($string, $maxLength, $substitute = '') {
 	
 	return $string;
 }
-function encrypt_decrypt($action, $string, $key) {
+function encrypt_decrypt($action, $string, $keyConfig) {
 	$output = false;
 	
 	$encrypt_method = "AES-256-CBC";
-	$secret_key = $key;
+	$secret_key = $keyConfig;
 	$secret_iv = $secret_key;
 	
 	// hash
