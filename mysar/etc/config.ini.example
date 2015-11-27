@@ -2,3 +2,4 @@ dbUser = mysar
 dbPass = mysar
 dbHost = localhost
 dbName = mysar
+key = encryptionkey
