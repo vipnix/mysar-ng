@@ -225,7 +225,7 @@ while (!feof($handle)) {
 		$query.=',';
 		$query.="'".$dbRecord['bytes']."'";
 		$query.=',';
-		$query.="'".$dbRecord['url']."'";
+		$query.="'".encrypt_decrypt('encrypt', $dbRecord['url'], $iniConfig['key'])."'";
 		$query.=',';
 		$query.="'".$dbRecord['authuser']."'";
 		$query.=')';
@@ -266,6 +266,7 @@ while (!feof($handle)) {
 	$dbUrl.='/';
 
 	$dbUrl=substr($dbUrl,0,254);
+	$dbUrl = encrypt_decrypt('encrypt', $dbUrl, $iniConfig['key']);
 
 	debug('Full host url is '.$dbUrl,40,__FILE__,__LINE__);
 	
