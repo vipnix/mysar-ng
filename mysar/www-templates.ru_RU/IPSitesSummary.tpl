@@ -8,7 +8,6 @@
 <p>
 <div class="table-responsive"><table class="table table-condensed">
   <tr><td style="font-size: 20px;">
-    <a href="{$smarty.server.PHP_SE
     {if $pageVars.previousWeekID != ""}
       <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&hostiplong={$pageVars.hostiplong}&date={$pageVars.previousWeek}&usersID={$pageVars.previousWeekID}">&lt;&lt;</a>
 	{/if}
