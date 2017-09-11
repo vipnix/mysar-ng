@@ -51,7 +51,7 @@ AC_CHECK_LIB(mysqlclient, mysql_init,
 # hunt through several directories trying to find the libraries
 if test "x$MYSQL_LIBS" = "x"; then
 	old_LDFLAGS="$LDFLAGS"
-	for try in $mysql_lib_dir /usr/lib /usr/lib/mysql /usr/local/lib /usr/local/mysql/lib /usr/local/lib/mysql ; do
+	for try in $mysql_lib_dir /usr/lib /usr/lib64/mysql /usr/lib/mysql /usr/local/lib /usr/local/mysql/lib /usr/local/lib/mysql ; do
 		LDFLAGS="$old_LDFLAGS -L$try"
 		unset ac_cv_lib_mysqlclient_mysql_init
 		AC_CHECK_LIB(mysqlclient, mysql_init,
