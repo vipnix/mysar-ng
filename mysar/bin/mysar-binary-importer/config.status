@@ -538,9 +538,9 @@ s,@INSTALL_DATA@,|#_!!_#|${INSTALL} -m 644,g
 s,@CYGPATH_W@,|#_!!_#|echo,g
 s,@PACKAGE@,|#_!!_#|mysar,g
 s,@VERSION@,|#_!!_#|2.1.4,g
-s,@ACLOCAL@,|#_!!_#|${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal-1.9,g
+s,@ACLOCAL@,|#_!!_#|${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal,g
 s,@AUTOCONF@,|#_!!_#|${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoconf,g
-s,@AUTOMAKE@,|#_!!_#|${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake-1.9,g
+s,@AUTOMAKE@,|#_!!_#|${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake,g
 s,@AUTOHEADER@,|#_!!_#|${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoheader,g
 s,@MAKEINFO@,|#_!!_#|${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run makeinfo,g
 s,@install_sh@,|#_!!_#|/srv/www/htdocs/mysar/bin/mysar-binary-importer/config/install-sh,g

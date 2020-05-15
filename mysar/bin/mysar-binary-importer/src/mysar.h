@@ -145,11 +145,11 @@ char *MySAR_fetch_configvalue(char *);
 char *MySAR_select_field();
 void MySAR_prep_mysql();
 void MySAR_free_mysql_statements();
-inline void MySAR_import_traffic();
-inline void MySAR_import_hostnames();
-inline void MySAR_import_sites();
-inline void MySAR_import_users();
-inline void MySAR_import_summaries();
+extern inline void MySAR_import_traffic();
+extern void MySAR_import_hostnames();
+extern void MySAR_import_sites();
+extern void MySAR_import_users();
+extern void MySAR_import_summaries();
 long MySAR_fetch_config_long(char *name);
 int MySAR_update_config_long(long value, char *name);
 

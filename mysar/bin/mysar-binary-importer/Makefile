@@ -80,13 +80,13 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal-1.9
+ACLOCAL = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal
 AMDEP_FALSE = #
 AMDEP_TRUE = 
 AMTAR = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run tar
 AUTOCONF = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoconf
 AUTOHEADER = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoheader
-AUTOMAKE = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake-1.9
+AUTOMAKE = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3

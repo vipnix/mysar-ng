@@ -502,14 +502,14 @@ am_cv_CC_dependencies_compiler_type=gcc3
 ## Output variables. ##
 ## ----------------- ##
 
-ACLOCAL='${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal-1.9'
+ACLOCAL='${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal'
 AMDEPBACKSLASH='\'
 AMDEP_FALSE='#'
 AMDEP_TRUE=''
 AMTAR='${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run tar'
 AUTOCONF='${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoconf'
 AUTOHEADER='${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoheader'
-AUTOMAKE='${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake-1.9'
+AUTOMAKE='${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake'
 AWK='gawk'
 CC='gcc'
 CCDEPMODE='depmode=gcc3'

@@ -66,13 +66,13 @@ DIST_SOURCES = $(mysar_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal-1.9
+ACLOCAL = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run aclocal
 AMDEP_FALSE = #
 AMDEP_TRUE = 
 AMTAR = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run tar
 AUTOCONF = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoconf
 AUTOHEADER = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run autoheader
-AUTOMAKE = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake-1.9
+AUTOMAKE = ${SHELL} /srv/www/htdocs/mysar/bin/mysar-binary-importer/config/missing --run automake
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
