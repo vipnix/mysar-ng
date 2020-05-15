@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### 01 00 * * * root /srv/www/htdocs/mysar/bin/mysar-rotate-diario.sh
+### 01 00 * * * root /var/www/html/mysar/bin/mysar-rotate-diario.sh
 
 
 LOGDIR="/var/log/squid"
