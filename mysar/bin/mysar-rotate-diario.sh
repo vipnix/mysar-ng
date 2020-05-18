@@ -23,7 +23,7 @@ mv ${LOGDIR}/access.log ${MENSALDIR}/access.log-${ONTEM}
 
 # cria novo arquivo de log
 touch ${LOGDIR}/access.log
-chown squid.www ${LOGDIR}/access.log
+chown squid.apache ${LOGDIR}/access.log
 
 # inicia o squid
 /etc/init.d/squid start
