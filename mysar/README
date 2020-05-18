@@ -1,5 +1,5 @@
 MySQL Squid Access Report New Generation
-https://github.com/McKay1717/mysar-ng
+https://github.com/coffnix/mysar-ng
 
 MySQL Squid Access Report, mysar for short, is a reporting system for user web traffic activity, as logged from a squid proxy.
 
@@ -18,5 +18,5 @@ Its key features are:
 - Easy. With a foolproof installation and a user-friendly web interface, mysar makes web traffic reporting easier than ever.
 - Customisable. Mysar needn't be on the same server as squid or MySQL. If your load is too high, just load-balance your processes as you see fit.
 
-For more information, documentation, support instructions etc, please visit https://github.com/McKay1717/mysar-ng
+For more information, documentation, support instructions etc, please visit https://github.com/coffnix/mysar-ng
 Upgrade of the jobs of Ioannis Stoilis and coffnix
