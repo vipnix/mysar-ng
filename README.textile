@@ -64,10 +64,12 @@ mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar
 mysql> flush privileges;</code></pre>
 
 h4. 2.2- Import default database:
+
 <pre><code>mysql mysar < /opt/mysar-ng/mysar.sql </code></pre>
 
 
 h3. 3- Compile Binary importer
+
 <pre><code>cd /var/www/html/mysar/bin/mysar-binary-importer/ ; make clean && make && make install</code></pre>
 
 
