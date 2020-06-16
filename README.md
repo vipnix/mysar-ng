@@ -7,7 +7,7 @@ MySQL Squid Access Report (new generation)
 
 
 
-h1. MYSAR-ng Handbook
+**MYSAR-ng Handbook**
 
 h2. Requirements:
 
