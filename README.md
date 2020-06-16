@@ -9,7 +9,7 @@ MySQL Squid Access Report (new generation)
 
 **MYSAR-ng Handbook**
 
-h2. Requirements:
+**Requirements:**
 
 <pre><code>PHP 7
 Apache or Nginx
@@ -17,22 +17,22 @@ Mariadb 10.1 or higher
 mariadb-devel
 GCC</code></pre>
 
-h2. Installation:
+**Installation:**
 
-h3. 1- Install on APACHE:
+**1- Install on APACHE:**
 
-h4. 1.1- Clone repository:
+**1.1- Clone repository:**
 
 <pre><code>cd /opt ; git clone https://github.com/coffnix/mysar-ng.git
 mv /opt/mysar-ng/mysar /var/www/html/</code></pre>
 
-h4. 1.2- Copy file to apache conf dir:
+**1.2- Copy file to apache conf dir:**
 
 <pre><code>cp /var/www/html/mysar/etc/mysar.apache /etc/httpd/conf.d/mysar.conf</code></pre>
 
-h4. or configure manually
+**or configure manually**
 
-h4. (apache 2.2):
+**(apache 2.2):**
 
 <pre><code>Alias /mysar /var/www/html/mysar/www
 <Directory "/var/www/html/mysar/www">
@@ -44,7 +44,7 @@ h4. (apache 2.2):
 </Directory></code></pre>
 
 
-h4. (apache 2.4):
+**(apache 2.4):**
 
 <pre><code>Alias /mysar /var/www/html/mysar/www
 <Directory "/var/www/html/mysar/www">
@@ -55,7 +55,7 @@ h4. (apache 2.4):
 </Directory></code></pre>
 
 
-h4. 1.3- Restart apache:
+**1.3- Restart apache:**
 
 <pre><code>systemctl restart httpd</code></pre>
 
