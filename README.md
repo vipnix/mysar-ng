@@ -3,7 +3,7 @@ mysar-ng
 
 MySQL Squid Access Report (new generation)
 
-![Screenshot](Mysar-ng-v2.png)
+![Screenshot](mysar-ng-v2.png)
 
 
 
