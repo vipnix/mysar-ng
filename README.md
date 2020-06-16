@@ -59,33 +59,33 @@ mv /opt/mysar-ng/mysar /var/www/html/</code></pre>
 
 <pre><code>systemctl restart httpd</code></pre>
 
-h3. 2- Install on MYSQL:
+**2- Install on MYSQL:**
 
-h4. 2.1- Create user and database:
+**2.1- Create user and database:**
 
 <pre><code>mysql> create database mysar;
 mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar123';
 mysql> flush privileges;</code></pre>
 
-h4. 2.2- Import default database:
+**2.2- Import default database:**
 
 <pre><code>mysql mysar < /opt/mysar-ng/mysar.sql </code></pre>
 
 
-h3. 3- Compile Binary importer
+**3- Compile Binary importer**
 
 <pre><code>cd /var/www/html/mysar/bin/mysar-binary-importer/ ; make clean && make && make install</code></pre>
 
 
-h3. 4- Configure your crontab
+**4- Configure your crontab**
 
 <pre><code>* * * * *      root    /usr/bin/mysar > /var/www/html/mysar/log/mysar-importer.log 2>&1
 01 00 * * * root /var/www/html/mysar/bin/mysar-rotate-diario.sh</code></pre>
 
 
-h1. Best practices
+**Best practices**
 
-h2. turn off logs cache_object on SQUID:
+**turn off logs cache_object on SQUID:**
 
 <pre><code>acl manager proto cache_object
 acl localhost src 127.0.0.1/32
