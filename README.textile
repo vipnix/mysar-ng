@@ -3,6 +3,8 @@ mysar-ng
 
 MySQL Squid Access Report (new generation)
 
+![alt text](https://area31.net.br/wiki/images/3/3f/Mysar-ng-v2.png)
+
 
 h1. MYSAR-ng Handbook
 
