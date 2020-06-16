@@ -8,7 +8,8 @@ h1. MYSAR-ng Handbook
 
 h2. Requirements:
 
-<pre><code>Apache or Nginx
+<pre><code>PHP 7
+Apache or Nginx
 Mariadb 10.1 or higher
 mariadb-devel
 GCC</code></pre>
