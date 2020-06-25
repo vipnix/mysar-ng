@@ -22,7 +22,9 @@ test_running
 ###############################################################################
 # Iniciando script
 
-/usr/bin/mysar > /var/www/html/mysar-reports/log/mysar-importer.log 2>&1
+#/usr/bin/mysar > /var/www/html/mysar-reports/log/mysar-importer.log 2>&1
+/usr/bin/mysar --offline --logfile /var/log/squid/access.log > /var/www/html/mysar/log/mysar-importer.log 2>&1
+
 
 ###############################################################################
 # Fim do script
