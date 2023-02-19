@@ -46,8 +46,8 @@
 #define xSTMT_SELUSERS		"SELECT id FROM users WHERE date=? AND authuser=?"
 #define xSTMT_INSUSERS		"INSERT INTO users(authuser,date) VALUES (?,?)"
 
-#define xSTMT_INSSUMS_IN	"INSERT IGNORE INTO trafficSummaries(date,ip,inCache,sitesID,usersID,summaryTime) VALUES (?,?,?,?,?,?)"
-#define xSTMT_INSSUMS_OUT	"INSERT IGNORE INTO trafficSummaries(date,ip,outCache,sitesID,usersID,summaryTime) VALUES (?,?,?,?,?,?)"
+#define xSTMT_INSSUMS_IN	"INSERT INTO trafficSummaries(date,ip,inCache,sitesID,usersID,summaryTime) VALUES (?,?,?,?,?,?)"
+#define xSTMT_INSSUMS_OUT	"INSERT INTO trafficSummaries(date,ip,outCache,sitesID,usersID,summaryTime) VALUES (?,?,?,?,?,?)"
 
 #define xSTMT_UPDSUMS_IN	"UPDATE trafficSummaries SET inCache=inCache+? WHERE date=? AND ip=? AND sitesID=? AND usersID=? AND summaryTime=?"
 #define xSTMT_UPDSUMS_OUT	"UPDATE trafficSummaries SET outCache=outCache+? WHERE date=? AND ip=? AND sitesID=? AND usersID=? AND summaryTime=?"
@@ -724,10 +724,11 @@ void MySAR_prep_mysql(void)
         bind_update_sums_in[4].length = &record.l_usersid;
 
 	        // Summary Time
-        bind_update_sums_in[5].buffer_type = MYSQL_TYPE_TINY;
-        bind_update_sums_in[5].buffer = &record.sumtime;
+        bind_update_sums_in[5].buffer_type = MYSQL_TYPE_STRING;
+        bind_update_sums_in[5].buffer = record.sumtime;
+        bind_update_sums_in[5].buffer_length = record.l_sumtime;
         bind_update_sums_in[5].is_null = 0;
-        bind_update_sums_in[5].length = 0;
+        bind_update_sums_in[5].length = &record.l_sumtime;
 
 
         if (mysql_stmt_bind_param(update_sums_in, bind_update_sums_in) != 0)
