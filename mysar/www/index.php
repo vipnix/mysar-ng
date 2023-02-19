@@ -68,7 +68,9 @@ if(empty($_REQUEST['date'])) {
 	$pageVars['date']=$_REQUEST['date'];
 }
 
-$pageVars['uri']=isset($_SERVER['REQUEST_URI']);
+$base_url = "/mysar";
+//#$pageVars['uri']=isset($_SERVER['REQUEST_URI']);
+$pageVars['uri'] = $base_url . substr($_SERVER['REQUEST_URI'], strlen($base_url));
 $pageVars['thisDateFormatted']=date('l, d F Y',date_timestampFromDbDate($pageVars['date'],'-'));
 $dateArray=explode('-',$pageVars['date']);
 $pageVars['today']=date('Y-m-d');

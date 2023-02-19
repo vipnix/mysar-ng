@@ -43,3 +43,7 @@ A:visited:hover	{
 	color:#2F97FF;
 	text-decoration: underline;
 }
+.img-with-border {
+    border: 1px solid black;
+}
+
