@@ -276,10 +276,11 @@ int main(int argc, char *argv[])
 		// and record them respectively.
 		strftime(record.date, 11, "%F", &time_result);
 		record.l_date = 10;
-		strftime(record.time, 10, "%T", &time_result);
-		record.l_time = 10;
+		strftime(record.time, 9, "%T", &time_result);
+		record.l_time = 8;
 		strftime(record.sumtime, 3, "%H", &time_result);
-		record.l_sumtime = 3;
+		record.l_sumtime = 2;
+		record.sumtime[2] = '\0';
 
 		record.l_stamp = strlen(mws[0]);
 		record.l_ip = strlen(mws[2]);
