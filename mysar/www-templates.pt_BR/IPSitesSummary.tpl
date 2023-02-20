@@ -1,5 +1,5 @@
 <nobr>[
-<a href="{$smarty.server.PHP_SELF}?a=IPSummary&date={$pageVars.today}">&lt;&lt;&lt; Voltar para "Estacoes e usuarios de um dia especifico"</a>
+<a href="{$smarty.server.PHP_SELF}?a=IPSummary&date={$pageVars.today}">&lt;&lt;&lt; Voltar para "esta&ccedil;&otilde;es e usu&aacute;rios de um dia espec&iacute;fico"</a>
 |
 <a href="{$pageVars.uri}">Atualizar esta p&aacute;gina</a>
 ]</nobr>
@@ -39,7 +39,7 @@
   <input type="hidden" name="usersID" value="{$pageVars.usersID}">
 *}
   <tr><td>Nome</td><td style="text-align:left;">{$pageVars.host.hostname}</td></tr>
-  <tr><td>Endere&ccedil;o IP</td><td style="text-align:left;">{$pageVars.host.ip}</td></tr>
+  <tr><td>Endere&ccedil;o IP</td><td style="text-align:left;">{$pageVars.host.hostname}</td></tr>
   <tr><td>Descri&ccedil;&atilde;o</td><td style="text-align:left;"><input type="text" name="thisValue" value="{$pageVars.host.description}"</td></tr>
   <tr><td>Nome Usu&aacute;rio</td><td style="text-align:left;">{$pageVars.user.authuser}</tr>
   </form>
