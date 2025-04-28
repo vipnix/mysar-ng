@@ -69,7 +69,7 @@ if(empty($_REQUEST['date'])) {
 }
 
 $base_url = "/mysar";
-//#$pageVars['uri']=isset($_SERVER['REQUEST_URI']);
+//$pageVars['uri']=isset($_SERVER['REQUEST_URI']);
 $pageVars['uri'] = $base_url . substr($_SERVER['REQUEST_URI'], strlen($base_url));
 $pageVars['thisDateFormatted']=date('l, d F Y',date_timestampFromDbDate($pageVars['date'],'-'));
 $dateArray=explode('-',$pageVars['date']);
@@ -679,7 +679,7 @@ switch($a_switch) {
 		$query.="traffic.sitesID='".$pageVars['sitesID']."'";
 		$query.=' ORDER BY traffic.time DESC ';
 		$query.=' LIMIT 10';
-		$pageVars['latestSiteActivity']=db_select_all($query);
+		$pageVars['latestSiteActivity'] = db_select_all($link, $query);
 		
 		$template='siteusers';
 		break;
@@ -694,7 +694,9 @@ switch($a_switch) {
 		} elseif(isset($_REQUEST['action']) && $_REQUEST['action']=='eraseAllStats') {
 			$tables=array('hostnames','sites','traffic','trafficSummaries','users');
 			reset($tables);
-			while(list($key,$value)=each($tables)) {
+#			while(list($key,$value)=each($tables)) {
+			foreach ($tables as $key => $value) {
+
 				$query='TRUNCATE TABLE '.$value;
 				db_query($link, $query);
 			}
@@ -708,7 +710,9 @@ switch($a_switch) {
 		$configVariables[]='topGrouping';
 		
 		reset($configVariables);
-		while(list($key,$value)=each($configVariables)) {
+#		while(list($key,$value)=each($configVariables)) {
+		foreach ($configVariables as $key => $value) {
+
 			$pageVars[$value]=getConfigValue($link, $value);
 		}
 

@@ -16,7 +16,8 @@ if [ ! -d ${MENSALDIR} ]; then
 fi
 
 # Parando squid...
-/etc/init.d/squid stop
+#/etc/init.d/squid stop
+systemctl stop squid
 
 # Armazena log atual
 mv ${LOGDIR}/access.log ${MENSALDIR}/access.log-${ONTEM}
@@ -26,7 +27,8 @@ touch ${LOGDIR}/access.log
 chown squid.www ${LOGDIR}/access.log
 
 # inicia o squid
-/etc/init.d/squid start
+#/etc/init.d/squid start
+systemctl start squid
 
 gzip ${MENSALDIR}/access.log-${ONTEM}
 

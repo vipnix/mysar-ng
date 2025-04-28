@@ -1,5 +1,5 @@
 <?php
-
+include '../..//check_session.php';
 if(file_exists($basePath.'/etc/config.ini')) {
 	$iniConfig=parse_ini_file($basePath.'/etc/config.ini');
 } else {
@@ -40,7 +40,7 @@ if(!$result) {
 debug('Done.',40,__FILE__,__LINE__);
 
 define('PROGRAM_NAME_SHORT','mysar');
-define('PROGRAM_NAME_LONG','MySQL Squid Access Report');
+define('PROGRAM_NAME_LONG','Mysar-ng VIPNIX');
 define('PROGRAM_VERSION','');
 
 
