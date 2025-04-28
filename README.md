@@ -11,7 +11,7 @@ MySQL Squid Access Report (new generation)
 
 **Requirements:**
 
-<pre><code>PHP 7
+<pre><code>PHP 8.2
 Apache or Nginx
 Mariadb 10.1 or higher
 mariadb-devel
