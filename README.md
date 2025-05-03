@@ -11,9 +11,10 @@ Relatório de Acesso Squid com MySQL (nova geração)
 ```
 PHP 8.2
 Apache ou Nginx
-MariaDB 10.1 ou superior
-mariadb-devel
-GCC
+MariaDB 10.11.x ou superior
+libmariadb-devel
+glibc-2.38
+GCC 13.3.1
 ```
 
 **Instalação:**
@@ -85,7 +86,7 @@ mysql mysar < /opt/mysar-ng/mysar.sql
 **3 - Compilar o importador binário**
 
 ```
-cd /var/www/html/mysar/bin/mysar-binary-importer/ ; make clean && make && make install
+cd /var/www/html/mysar/bin/mysar-binary-importer/ ; make clean ; CPPFLAGS="-I/usr/include/mariadb" LDFLAGS="-L/usr/lib64" ./configure --prefix=/usr --sysconfdir=/etc --with-mysql-lib=/usr/lib64 --with-mysql-include=/usr/include/mariadb ; make ; make install
 ```
 
 **4 - Configurar crontab**
