@@ -1,102 +1,160 @@
-mysar-ng
-========
+# mysar-ng
 
-MySQL Squid Access Report (new generation)
+Relatório de Acesso Squid com MySQL (nova geração)
 
 ![Screenshot](mysar-ng-v3.png)
 
+**Manual do MYSAR-ng**
 
+**Requisitos:**
 
-**MYSAR-ng Handbook**
-
-**Requirements:**
-
-<pre><code>PHP 8.2
-Apache or Nginx
-Mariadb 10.1 or higher
+```
+PHP 8.2
+Apache ou Nginx
+MariaDB 10.1 ou superior
 mariadb-devel
-GCC</code></pre>
+GCC
+```
 
-**Installation:**
+**Instalação:**
 
-**1- Install on APACHE:**
+**1 - Instalar no APACHE:**
 
-**1.1- Clone repository:**
+**1.1 - Clonar o repositório:**
 
-<pre><code>cd /opt ; git clone https://github.com/coffnix/mysar-ng.git
-mv /opt/mysar-ng/mysar /var/www/html/</code></pre>
+```
+cd /opt ; git clone https://github.com/coffnix/mysar-ng.git
+mv /opt/mysar-ng/mysar /var/www/html/
+```
 
-**1.2- Copy file to apache conf dir:**
+**1.2 - Copiar o arquivo para a pasta de configuração do apache:**
 
-<pre><code>cp /var/www/html/mysar/etc/mysar.apache /etc/httpd/conf.d/mysar.conf</code></pre>
+```
+cp /var/www/html/mysar/etc/mysar.apache /etc/httpd/conf.d/mysar.conf
+```
 
-**or configure manually**
+**ou configurar manualmente**
 
 **(apache 2.2):**
 
-<pre><code>Alias /mysar /var/www/html/mysar/www
+```
+Alias /mysar /var/www/html/mysar/www
 <Directory "/var/www/html/mysar/www">
         Options Indexes MultiViews
         Options Indexes FollowSymLinks
         AllowOverride None
         Order allow,deny
         Allow from all
-</Directory></code></pre>
-
+</Directory>
+```
 
 **(apache 2.4):**
 
-<pre><code>Alias /mysar /var/www/html/mysar/www
+```
+Alias /mysar /var/www/html/mysar/www
 <Directory "/var/www/html/mysar/www">
         Options Indexes MultiViews
         Options Indexes FollowSymLinks
         AllowOverride None
         Require all granted
-</Directory></code></pre>
+</Directory>
+```
 
+**1.3 - Reiniciar apache:**
 
-**1.3- Restart apache:**
+```
+systemctl restart httpd
+```
 
-<pre><code>systemctl restart httpd</code></pre>
+**2 - Instalar no MYSQL:**
 
-**2- Install on MYSQL:**
+**2.1 - Criar usuário e banco de dados:**
 
-**2.1- Create user and database:**
-
-<pre><code>mysql> create database mysar;
+```
+mysql> create database mysar;
 mysql> grant all privileges on mysar.* to mysar@'localhost' identified by 'mysar123';
-mysql> flush privileges;</code></pre>
+mysql> flush privileges;
+```
 
-**2.2- Import default database:**
+**2.2 - Importar banco de dados padrão:**
 
-<pre><code>mysql mysar < /opt/mysar-ng/mysar.sql </code></pre>
+```
+mysql mysar < /opt/mysar-ng/mysar.sql
+```
 
+**3 - Compilar o importador binário**
 
-**3- Compile Binary importer**
+```
+cd /var/www/html/mysar/bin/mysar-binary-importer/ ; make clean && make && make install
+```
 
-<pre><code>cd /var/www/html/mysar/bin/mysar-binary-importer/ ; make clean && make && make install</code></pre>
+**4 - Configurar crontab**
 
+```
+* * * * *      root    /usr/bin/mysar > /var/www/html/mysar/log/mysar-importer.log 2>&1
+01 00 * * * root /var/www/html/mysar/bin/mysar-rotate-diario.sh
+```
 
-**4- Configure your crontab**
+**Boas práticas**
 
-<pre><code>* * * * *      root    /usr/bin/mysar > /var/www/html/mysar/log/mysar-importer.log 2>&1
-01 00 * * * root /var/www/html/mysar/bin/mysar-rotate-diario.sh</code></pre>
+**Desativar logs cache\_object no SQUID:**
 
-
-**Best practices**
-
-**turn off logs cache_object on SQUID:**
-
-<pre><code>acl manager proto cache_object
+```
+acl manager proto cache_object
 acl localhost src 127.0.0.1/32
 
 log_access deny manager
-http_access allow manager localhost</code></pre>
+http_access allow manager localhost
+```
 
-For more infos, please RTFM :D
+Mais informações: RTFM \:D
 
-Squid old: http://www.squid-cache.org/Doc/config/log_access/
+Squid antigo: [http://www.squid-cache.org/Doc/config/log\_access/](http://www.squid-cache.org/Doc/config/log_access/)
 
-Squid new: http://www.squid-cache.org/Doc/config/access_log/ 
+Squid novo: [http://www.squid-cache.org/Doc/config/access\_log/](http://www.squid-cache.org/Doc/config/access_log/)
 
+## Changelog: MySAR-NG (6f79a578..b29c38b7) - Setembro de 2023 a Maio de 2025
+
+Alinhamento da Função MySAR\_import\_sites com o Código Antigo
+Arquivo: src/sql.c
+Mudança: A função MySAR\_import\_sites foi revisada para remover validações rigorosas de record.site e record.date, restaurando o comportamento do código original (pré-2023), que permitia inserções sem verificações de strings vazias ou datas inválidas.
+
+Remoção do Filtro NONE\_NONE
+Arquivo: src/mysar.c
+Mudança: Eliminado o filtro que descartava linhas do log com NONE\_NONE no campo resultCode (mws\[3]).
+
+Melhoria no Fallback de record.site
+Arquivo: src/mysar.c
+Mudança: Aprimorada a lógica de geração de record.site para URLs atípicas, inspirada no código antigo.
+
+Sanitização Mínima de URLs
+Arquivo: src/mysar.c
+Mudança: Reduzida a sanitização de URLs para substituir apenas espaços e tabulações.
+
+Depuração Aprimorada
+Arquivos: src/mysar.c, src/sql.c
+Mudança: Adicionada depuração detalhada para rastrear descartes e inserções.
+
+Correção de Configurações de Offset
+Arquivo: Banco de dados (config table)
+Mudança: Zerar lastLogOffset e lastTimestamp para evitar descartes por carimbos de tempo antigos.
+
+Manutenção da Validação de Carimbos de Tempo
+Arquivo: src/mysar.c
+Mudança: Mantida a validação de time\_tm\_cycle e record.date para evitar datas inválidas (0000-00-00).
+
+Tratamento de URLs Longas (Split Tokens Underflow)
+Arquivo: src/mysar.c
+Mudança: Mantida a lógica de descarte para 68 linhas com menos de 10 tokens, mas com depuração para análise futura.
+
+Compatibilidade com MariaDB 10.11
+Arquivo: Nenhum (configuração de compilação)
+Mudança: Ajustes na configuração de compilação para suportar MariaDB 10.11.9.
+
+Documentação Implícita
+Arquivo: Nenhum (práticas de desenvolvimento)
+Mudança: Adição de comentários e logs no código para documentar mudanças, inspirados em práticas de kernel.
+
+Resumo
+As mudanças de 2023 a 2025 transformaram o MySAR-NG de um estado com importação incompleta (21.986 registros) para uma solução robusta que importa 49.749 de 49.833 registros, alinhando a função MySAR\_import\_sites ao comportamento do código antigo, removendo filtros restritivos como NONE\_NONE, aprimorando o fallback de record.site para URLs atípicas, reduzindo a sanitização de URLs, adicionando depuração detalhada, e corrigindo configurações de offset, tudo isso mantendo compatibilidade com MariaDB 10.11 e garantindo que a tabela sites seja populada corretamente para uso na interface web.
 
