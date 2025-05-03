@@ -114,6 +114,59 @@ Squid antigo: [http://www.squid-cache.org/Doc/config/log\_access/](http://www.sq
 
 Squid novo: [http://www.squid-cache.org/Doc/config/access\_log/](http://www.squid-cache.org/Doc/config/access_log/)
 
+## Opções de Linha de Comando Disponíveis
+
+Abaixo estão os parâmetros que podem ser utilizados ao executar o importador binário do MySAR-ng (`mysar`), com explicações técnicas sobre seu comportamento:
+
+- `--resolver`  
+  Ativa o resolvedor DNS durante a importação. Útil para popular automaticamente domínios a partir de IPs.
+
+- `--noresolver`  
+  Desativa o resolvedor DNS (padrão). Nenhuma resolução de IP para nome será realizada.
+
+- `--traffic`  
+  Ativa a importação completa do tráfego de navegação a partir do log (padrão). Inclui URLs acessadas e seus respectivos domínios.
+
+- `--notraffic`  
+  Desativa a importação completa de tráfego. Detalhes de navegação não serão importados (apenas dados brutos).
+
+- `--zip <arquivo>`  
+  Importa um arquivo compactado (`.gz`) em modo offline. O modo offline não depende do deslocamento do log atual.
+
+- `--logfile <arquivo>`  
+  Importa um arquivo de log de texto plano em modo offline, ideal para logs antigos ou backups.
+
+- `--debug`  
+  Ativa funcionalidades de depuração. Exibe mensagens detalhadas úteis para diagnosticar problemas obscuros durante o parsing ou inserção.
+
+- `--config <arquivo>`  
+  Define um arquivo de configuração alternativo ao padrão (`/etc/mysar.conf`).
+
+- `--help`  
+  Mostra a ajuda com todas as opções de linha de comando disponíveis.
+
+- `--generatedb`  
+  Executa o gerador de banco de dados. Cria ou substitui as tabelas utilizadas pelo MySAR.
+
+- `--stats`  
+  Exibe o status dos registros processados durante a importação (ex.: quantidade de linhas, inserções, descartes).
+
+- `--optimizedb`  
+  Força a execução do otimizador de banco de dados. Reorganiza índices e melhora performance em grandes volumes de dados.
+
+- `--groupdomains`  
+  Agrupa domínios semelhantes na visualização de sites. Melhora a precisão do tráfego, mas pode reduzir a performance.
+
+- `--offline`  
+  Modo de importação offline. Necessita de `--logfile` ou `--zip`. Ignora o offset salvo, útil para logs antigos.
+
+- `--quiet`  
+  Executa em modo silencioso. Nenhuma mensagem será mostrada no terminal. Erros são redirecionados para o `syslog`.
+
+- `--kill`  
+  Envia um sinal de encerramento ao importador binário em execução. Ele será finalizado de forma segura.
+
+
 ## Changelog: MySAR-NG (6f79a578..b29c38b7) - Setembro de 2023 a Maio de 2025
 
 Alinhamento da Função MySAR\_import\_sites com o Código Antigo
