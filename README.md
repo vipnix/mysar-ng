@@ -4,6 +4,12 @@ Relatório de Acesso Squid com MySQL (nova geração)
 
 ![Screenshot](mysar-ng-v3.png)
 
+
+![Screenshot](mysar-importer-c.png) 
+![Screenshot](mysar-importer-c-optimize-db.png)
+
+
+
 **Manual do MYSAR-ng**
 
 **Requisitos:**
