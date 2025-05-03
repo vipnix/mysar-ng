@@ -1,6 +1,6 @@
 /*
  Program: mysar, File: sql.c
- Copyright 2007, Cassiano Martin <cassiano@polaco.pro.br>
+ BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br
 
  Source is based on MySar 1.x importer, written by David 'scuzzy' Todd <mobilepolice@gmail.com>
 
@@ -68,7 +68,7 @@ MYSQL_STMT	*update_sums_out = NULL;
 MYSQL_STMT	*insert_sums_in = NULL;
 MYSQL_STMT	*insert_sums_out = NULL;
 
-MYSQL_BIND	bind_insert_traffic[6];
+MYSQL_BIND	bind_insert_traffic[9];
 MYSQL_BIND	bind_insert_resolved[3];
 MYSQL_BIND	bind_select_resolved[1];
 MYSQL_BIND	bind_insert_sites[2];
@@ -198,11 +198,19 @@ void MySAR_free_mysql_statements()
 // used to prepare MySQL statements
 void MySAR_prepare_stmt(MYSQL_STMT *stmt, const char *stmt_str, unsigned long length)
 {
+	if (!stmt) {
+		MySAR_print(MSG_ERROR, "FATAL: NULL statement pointer in MySAR_prepare_stmt");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
 	MySAR_print(MSG_DEBUG, "Preparing Statement: %s", stmt_str);
-
-	if (mysql_stmt_prepare(stmt, stmt_str, length) != 0)
+	if (mysql_stmt_prepare(stmt, stmt_str, length) != 0) {
 		MySAR_print(MSG_ERROR, "FATAL: Error while preparing MySQL statement: %s", mysql_stmt_error(stmt));
-
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
 }
 
 // inlining give it a boost, as these routines are called lots of times
@@ -227,7 +235,8 @@ inline void MySAR_bind_stmt(MYSQL_STMT *stmt, MYSQL_BIND *bind)
 
 }
 
-inline void MySAR_import_traffic()
+
+void MySAR_import_traffic()
 {
 	if (config->importtraffic)
 	{
@@ -236,7 +245,7 @@ inline void MySAR_import_traffic()
 	}
 }
 
-inline void MySAR_import_hostnames()
+void MySAR_import_hostnames()
 {
 	struct sockaddr_in san;
 	int fetch_return;
@@ -247,10 +256,10 @@ inline void MySAR_import_hostnames()
 	MySAR_bind_stmt(select_resolved, bind_output);
 
 	fetch_return = mysql_stmt_fetch(select_resolved);
-	
+
 	// huh? host is not in table
 	// enter this routine only if the host is not on table
-	if (fetch_return == MYSQL_NO_DATA) 
+	if (fetch_return == MYSQL_NO_DATA)
 	{
 		// Get the hostname of the record, if enabled. - if it returns non-zero, use the ip address.
 		if (config->resolver)
@@ -262,7 +271,7 @@ inline void MySAR_import_hostnames()
 			san.sin_addr.s_addr = inet_addr(record.ip);
 			memset(&(san.sin_zero), '\0', 8);
 			san_len = sizeof(san);
-		
+
 			if (getnameinfo((struct sockaddr *)&san, san_len, record.hostname, sizeof(record.hostname), NULL, 0, NI_NAMEREQD) != 0)
 			{
 				// nope, could not get hostname. use IP instead.
@@ -272,8 +281,8 @@ inline void MySAR_import_hostnames()
 			}
 			else
 				strcpy(record.isResolved, "1");
-		} 
-		else 
+		}
+		else
 		{
 			// if resolver disabled, use the IP address
 			strcpy(record.hostname, record.ip);
@@ -285,8 +294,8 @@ inline void MySAR_import_hostnames()
 		// execute the insert statement
 		(void)MySAR_execute_stmt(insert_resolved);
 
-	} 
-	else if (fetch_return == 0) 
+	}
+	else if (fetch_return == 0)
 	{
 		// got it
 		//if (mysql_stmt_fetch_column(select_resolved, bind_output, 0, 0) == 0)
@@ -295,89 +304,126 @@ inline void MySAR_import_hostnames()
 		//}
 		//else
 		//	MySAR_print(MSG_ERROR, "mysql_stmt_fetch_column in processing loop %s", mysql_stmt_error(select_resolved));
-	} 
+	}
 	else
 		MySAR_print(MSG_ERROR, "Statement Error in MySAR_import_hostnames(): %s", mysql_stmt_error(select_resolved));
-
 
 	// Free statements
 	// hostname search is completed
 	mysql_stmt_free_result(select_resolved);
 }
 
-inline void MySAR_import_sites()
+
+
+//############################
+
+void MySAR_import_sites()
 {
-	int fetch_return;
+    int fetch_return;
+    static unsigned long insert_count = 0; // Contador de inserções
 
-	// execute the statement to find the desired site on the database
-	(void)MySAR_execute_stmt(select_sites);
-	MySAR_bind_stmt(select_sites, bind_output);
+    // Ignore sites with length > 240 characters
+    if (record.l_site > 240) {
+        MySAR_print(MSG_NOTICE, "Site length exceeds 240 characters, skipping insert_sites");
+        snprintf(record.siteid, sizeof(record.siteid), "0");
+        record.l_siteid = strlen(record.siteid);
+        return;
+    }
 
-	fetch_return = mysql_stmt_fetch(select_sites);
+    // Debug the values being inserted
+    if (config->debug_enabled) {
+        MySAR_print(MSG_DEBUG, "Attempting to insert site: %s, date: %s", record.site, record.date);
+    }
 
-	// insert it
-	if (fetch_return == MYSQL_NO_DATA) 
-	{
-		if (MySAR_execute_stmt(insert_sites) == 0)
-			snprintf(record.siteid, sizeof(record.siteid), "%u", (unsigned int)mysql_stmt_insert_id(insert_sites));
-	}
-	else if (fetch_return == 0) 
-	{
-		if (mysql_stmt_fetch_column(select_sites, bind_output, 0, 0) == 0)
-			snprintf(record.siteid, sizeof(record.siteid), "%s", (char *)bind_output[0].buffer);
-		else
-			MySAR_print(MSG_ERROR, "mysql_stmt_fetch_column in process loop %s", mysql_stmt_error(select_sites));
-	} 
-	else
-		MySAR_print(MSG_ERROR, "Statement Error in MySAR_import_sites(): %s", mysql_stmt_error(select_sites));
+    // Execute the statement to find the desired site on the database
+    if (MySAR_execute_stmt(select_sites) != 0) {
+        MySAR_print(MSG_ERROR, "Select failed: %s", mysql_stmt_error(select_sites));
+        snprintf(record.siteid, sizeof(record.siteid), "0");
+        record.l_siteid = strlen(record.siteid);
+        mysql_stmt_free_result(select_sites);
+        return;
+    }
+    MySAR_bind_stmt(select_sites, bind_output);
 
+    fetch_return = mysql_stmt_fetch(select_sites);
 
-	record.l_siteid = strlen(record.siteid);
-	mysql_stmt_free_result(select_sites);
+    // Insert it
+    if (fetch_return == MYSQL_NO_DATA) {
+        if (MySAR_execute_stmt(insert_sites) == 0) {
+            unsigned long long insert_id = mysql_stmt_insert_id(insert_sites);
+            snprintf(record.siteid, sizeof(record.siteid), "%u", (unsigned int)insert_id);
+            insert_count++;
+            if (config->debug_enabled) {
+                MySAR_print(MSG_DEBUG, "Inserted site with ID: %s (Total inserts: %lu)", record.siteid, insert_count);
+            }
+        } else {
+            MySAR_print(MSG_ERROR, "Insert failed: %s", mysql_stmt_error(insert_sites));
+            snprintf(record.siteid, sizeof(record.siteid), "0");
+            record.l_siteid = strlen(record.siteid);
+        }
+    } else if (fetch_return == 0) {
+        if (mysql_stmt_fetch_column(select_sites, bind_output, 0, 0) == 0) {
+            snprintf(record.siteid, sizeof(record.siteid), "%s", (char *)bind_output[0].buffer);
+            if (config->debug_enabled) {
+                MySAR_print(MSG_DEBUG, "Found existing site ID: %s", record.siteid);
+            }
+        } else {
+            MySAR_print(MSG_ERROR, "mysql_stmt_fetch_column in process loop %s", mysql_stmt_error(select_sites));
+            snprintf(record.siteid, sizeof(record.siteid), "0");
+            record.l_siteid = strlen(record.siteid);
+        }
+    } else {
+        MySAR_print(MSG_ERROR, "Statement Error in MySAR_import_sites(): %s", mysql_stmt_error(select_sites));
+        snprintf(record.siteid, sizeof(record.siteid), "0");
+        record.l_siteid = strlen(record.siteid);
+    }
+
+    record.l_siteid = strlen(record.siteid);
+    mysql_stmt_free_result(select_sites);
 }
 
-inline void MySAR_import_users()
+//############################
+void MySAR_import_users()
 {
 	int fetch_return;
 
 	// execute the statement to find the desired user
 	(void)MySAR_execute_stmt(select_users);
 	MySAR_bind_stmt(select_users, bind_output);
-	
+
 	fetch_return = mysql_stmt_fetch(select_users);
-	
+
 	// insert it
-	if (fetch_return == MYSQL_NO_DATA) 
+	if (fetch_return == MYSQL_NO_DATA)
 	{
 		if (MySAR_execute_stmt(insert_users) == 0)
 			snprintf(record.usersid, sizeof(record.usersid), "%u", (unsigned int)mysql_stmt_insert_id(insert_users));
 	}
-	else if (fetch_return == 0) 
+	else if (fetch_return == 0)
 	{
 		if (mysql_stmt_fetch_column(select_users, bind_output, 0, 0) == 0)
 			snprintf(record.usersid, sizeof(record.usersid), "%s", (char *)bind_output[0].buffer);
 		else
 			MySAR_print(MSG_ERROR, "mysql_stmt_fetch_column in process loop %s", mysql_stmt_error(select_users));
-	} 
+	}
 	else
 		MySAR_print(MSG_ERROR, "Statement Error in MySAR_import_users(): %s", mysql_stmt_error(select_users));
-	
+
 	record.l_usersid = strlen(record.usersid);
 	mysql_stmt_free_result(select_users);
 }
 
-inline void MySAR_import_summaries()
+void MySAR_import_summaries()
 {
-
-	if (record.field == TYPE_IN_CACHE) 
+	if (record.field == TYPE_IN_CACHE)
 	{
 		// if the record exists in database...
 		(void)MySAR_execute_stmt(update_sums_in);
 
 		if (mysql_stmt_affected_rows(update_sums_in) == 0)
 			(void)MySAR_execute_stmt(insert_sums_in);
-	} 
-	else 
+	}
+	else
 	{
 		(void)MySAR_execute_stmt(update_sums_out);
 
@@ -386,537 +432,687 @@ inline void MySAR_import_summaries()
 	}
 }
 
+
+
 void MySAR_prep_mysql(void)
 {
-
 	// All prepares are done here. Statements declarations occupies
 	// a lot of lines, but they are really FAST!
 
-	// Initialize the Statements
-        if((insert_traffic = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  insert_traffic Failed!()");
-        if((insert_resolved = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  insert_resolved Failed!()");
-        if((select_resolved = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  select_resolved Failed!()");
-        if((insert_sites = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  insert_sites Failed!()");
-        if((select_sites = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  select_sites Failed!()");
-        if((insert_users = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  insert_users Failed!()");
-        if((select_users = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  select_users Failed!()");
-        if((update_sums_in = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  update_sums_in Failed!()");
-        if((update_sums_out = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  update_sums_out Failed!()");
-        if((insert_sums_in = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  insert_sums_in Failed!()");
-        if((insert_sums_out = mysql_stmt_init(mysql)) == NULL)		MySAR_print(MSG_ERROR, "Error initializing Statement:  insert_sums_out Failed!()");
-
-
-// Statement Type:      INSERT
-// Statement Name:	xSTMT_INSTRAFFIC	"INSERT INTO traffic(date,time,ip,resultCode,bytes,url,authuser) VALUES (?,?,?,?,?,?,?)"
-// Table:               traffic
-// Function:            Insert our current flat-file record into the
-//                      traffic table for later processing.
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(insert_traffic, xSTMT_INSTRAFFIC, sizeof(xSTMT_INSTRAFFIC));
-
-
-        memset(bind_insert_traffic, 0, sizeof(bind_insert_traffic));
-
-	// current date
-        bind_insert_traffic[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[0].buffer = record.date;
-        bind_insert_traffic[0].buffer_length = record.l_date;
-        bind_insert_traffic[0].is_null = 0;
-        bind_insert_traffic[0].length = &record.l_date;
-
-	// current timestamp
-        bind_insert_traffic[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[1].buffer = record.time;
-        bind_insert_traffic[1].buffer_length = record.l_time;
-        bind_insert_traffic[1].is_null = 0;
-        bind_insert_traffic[1].length = &record.l_time;
-
-	// current SitesID
-        bind_insert_traffic[2].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[2].buffer = record.siteid;
-        bind_insert_traffic[2].buffer_length = record.l_siteid;
-        bind_insert_traffic[2].is_null = 0;
-        bind_insert_traffic[2].length = &record.l_siteid;
-
-	// current UserID
-        bind_insert_traffic[3].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[3].buffer = record.usersid;
-        bind_insert_traffic[3].buffer_length = record.l_usersid;
-        bind_insert_traffic[3].is_null = 0;
-        bind_insert_traffic[3].length = &record.l_usersid;
-
-	// current IP in net short format
-        bind_insert_traffic[4].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[4].buffer = record.ipns;
-        bind_insert_traffic[4].buffer_length = record.l_ipns;
-        bind_insert_traffic[4].is_null = 0;
-        bind_insert_traffic[4].length = &record.l_ipns;
-
-	// Squid cache Result
-        bind_insert_traffic[5].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[5].buffer = record.result;
-        bind_insert_traffic[5].buffer_length = record.l_result;
-        bind_insert_traffic[5].is_null = 0;
-        bind_insert_traffic[5].length = &record.l_result;
-
-	// Total bytes used
-        bind_insert_traffic[6].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[6].buffer = record.bytes;
-        bind_insert_traffic[6].buffer_length = record.l_bytes;
-        bind_insert_traffic[6].is_null = 0;
-        bind_insert_traffic[6].length = &record.l_bytes;
-
-	// The URL
-        bind_insert_traffic[7].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[7].buffer = record.url;
-        bind_insert_traffic[7].buffer_length = record.l_url;
-        bind_insert_traffic[7].is_null = 0;
-        bind_insert_traffic[7].length = &record.l_url;
-
-	// if an user has been authenticated with squid...
-        bind_insert_traffic[8].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_traffic[8].buffer = record.authuser;
-        bind_insert_traffic[8].buffer_length = record.l_authuser;
-        bind_insert_traffic[8].is_null = 0;
-        bind_insert_traffic[8].length = &record.l_authuser;
-
-
-        if(mysql_stmt_bind_param(insert_traffic, bind_insert_traffic) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(insert_traffic));
-
-
-// Statement Type:	SELECT
-// Statement Name:	xSTMT_SELRESOLVED	"SELECT isResolved FROM hostnames WHERE ip=?"
-// Table: 		hostnames
-// Function:		Make an attempt to retrieve the host in the table to 
-//			determine if our record is already present.
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(select_resolved,xSTMT_SELRESOLVED, sizeof(xSTMT_SELRESOLVED));
-
-
-        memset(bind_select_resolved, 0, sizeof(bind_select_resolved));
-
-	// get the ID of the hostname
-	// ipns is a short for IP NetShort, not the dotted one
-        bind_select_resolved[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_select_resolved[0].buffer = record.ipns;
-        bind_select_resolved[0].buffer_length = record.l_ipns;
-        bind_select_resolved[0].is_null = 0;
-        bind_select_resolved[0].length = &record.l_ipns;
-
-        if (mysql_stmt_bind_param(select_resolved, bind_select_resolved) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(select_resolved));
-
-
-// Statement Type:      INSERT
-// Statement Name:	xSTMT_INSRESOLVED	"INSERT INTO hostnames (ip, hostname, isResolved) VALUES (?,?)"
-// Table:               hostnames
-// Function:            Statement select_resolved has returned nothing
-//                      or an invalid ID. Insert our record into the database.
-//
-// Status:		ADAPTED and WORKING
-
-	
-        MySAR_prepare_stmt(insert_resolved,xSTMT_INSRESOLVED, sizeof(xSTMT_INSRESOLVED));
-
-
-        memset(bind_insert_resolved, 0, sizeof(bind_insert_resolved));
-
-	// IP net short
-        bind_insert_resolved[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_resolved[0].buffer = record.ipns;
-        bind_insert_resolved[0].buffer_length = record.l_ipns;
-        bind_insert_resolved[0].is_null = 0;
-        bind_insert_resolved[0].length = &record.l_ipns;
-
-	// the host name, or the dotted IP, if not DNS resolved
-        bind_insert_resolved[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_resolved[1].buffer = record.hostname;
-        bind_insert_resolved[1].buffer_length = record.l_hostname;
-        bind_insert_resolved[1].is_null = 0;
-        bind_insert_resolved[1].length = &record.l_hostname;
-
-	// mark the IP record as DNS resolved?
-        bind_insert_resolved[2].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_resolved[2].buffer = record.isResolved;
-        bind_insert_resolved[2].buffer_length = record.l_isResolved;
-        bind_insert_resolved[2].is_null = 0;
-        bind_insert_resolved[2].length = &record.l_isResolved;
-
-        if (mysql_stmt_bind_param(insert_resolved, bind_insert_resolved) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(insert_resolved));
-
-
-// Statement Type:      SELECT
-// Statement Name:	xSTMT_SELSITES		"SELECT id FROM sites WHERE date=? AND site=?"
-// Table:               sites
-// Function:            Search the table for an id where the date
-//                      and site name match.
-//
-// Status:		ADAPTED and WORKING
-
-
-        MySAR_prepare_stmt(select_sites,xSTMT_SELSITES, sizeof(xSTMT_SELSITES));
-
-	// yeah
-        memset(bind_select_sites, 0, sizeof(bind_select_sites));
-
-	// date
-        bind_select_sites[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_select_sites[0].buffer = record.date;
-        bind_select_sites[0].buffer_length = record.l_date;
-        bind_select_sites[0].is_null = 0;
-        bind_select_sites[0].length = &record.l_date;
-
-	// site URL
-        bind_select_sites[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_select_sites[1].buffer = record.site;
-        bind_select_sites[1].buffer_length = record.l_site;
-        bind_select_sites[1].is_null = 0;
-        bind_select_sites[1].length = &record.l_site;
-
-        if (mysql_stmt_bind_param(select_sites, bind_select_sites) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(select_sites));
-
-
-// Statement Type:      INSERT
-// Statement Name:	xSTMT_INSSITES		"INSERT INTO sites(site,date) VALUES (?,?)"
-// Table:               sites
-// Function:            Insert record into table after failure of SELECT.
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(insert_sites, xSTMT_INSSITES, sizeof(xSTMT_INSSITES));
-
-
-        memset(bind_insert_sites, 0, sizeof(bind_insert_sites));
-
-	// Site URL
-        bind_insert_sites[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sites[0].buffer = record.site;
-        bind_insert_sites[0].buffer_length = record.l_site;
-        bind_insert_sites[0].is_null = 0;
-        bind_insert_sites[0].length = &record.l_site;
-
-	// Date
-        bind_insert_sites[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sites[1].buffer = record.date;
-        bind_insert_sites[1].buffer_length = record.l_date;
-        bind_insert_sites[1].is_null = 0;
-        bind_insert_sites[1].length = &record.l_date;
-
-
-        if (mysql_stmt_bind_param(insert_sites, bind_insert_sites) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(insert_sites));
-
-
-// Statement Type:	INSERT
-// Statement Name:	xSTMT_INSUSERS		"INSERT INTO users(authuser,date) VALUES (?,?)"
-// Table:               users
-// Function:            Insert record into table users, if not found
-//
-// Status:		ADAPTED, WORKING but missing isResolved field
-
-        MySAR_prepare_stmt(insert_users, xSTMT_INSUSERS, sizeof(xSTMT_INSUSERS));
-
-
-        memset(bind_insert_users, 0, sizeof(bind_insert_users));
-
-	// Authenticated user, or default user if no authentication present
-        bind_insert_users[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_users[0].buffer = record.authuser;
-        bind_insert_users[0].buffer_length = record.l_authuser;
-        bind_insert_users[0].is_null = 0;
-        bind_insert_users[0].length = &record.l_authuser;
-
-	// current date
-        bind_insert_users[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_users[1].buffer = record.date;
-        bind_insert_users[1].buffer_length = record.l_date;
-        bind_insert_users[1].is_null = 0;
-        bind_insert_users[1].length = &record.l_date;
-
-
-        if (mysql_stmt_bind_param(insert_users, bind_insert_users) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(insert_users));
-
-
-// Statement Type:	SELECT
-// Statement Name:	xSTMT_SELUSERS		"SELECT id FROM users WHERE date=? AND authuser=?"
-// Table:               users
-// Function:            Select a record on the table users
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(select_users, xSTMT_SELUSERS, sizeof(xSTMT_SELUSERS));
-
-
-        memset(bind_select_users, 0, sizeof(bind_select_users));
-
-	// current date
-        bind_select_users[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_select_users[0].buffer = record.date;
-        bind_select_users[0].buffer_length = record.l_date;
-        bind_select_users[0].is_null = 0;
-        bind_select_users[0].length = &record.l_date;
-
-	// Authenticated user, or default user if no authentication present
-        bind_select_users[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_select_users[1].buffer = record.authuser;
-        bind_select_users[1].buffer_length = record.l_authuser;
-        bind_select_users[1].is_null = 0;
-        bind_select_users[1].length = &record.l_authuser;
-
-
-        if (mysql_stmt_bind_param(select_users, bind_select_users) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(select_users));
-
-
-// Statement Type:      UPDATE
-// Statement Name:	xSTMT_UPDSUMS_IN	"UPDATE trafficSummaries SET inCache=inCache+? WHERE date=? AND ip=? AND sitesID=? AND usersID=? AND summaryTime=?"
-// Table:               trafficSummaries
-// Function:            Update the inCache fields.
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(update_sums_in, xSTMT_UPDSUMS_IN, sizeof(xSTMT_UPDSUMS_IN));
-
-
-        memset(bind_update_sums_in, 0, sizeof(bind_update_sums_in));
-
-	// Data Size
-        bind_update_sums_in[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_in[0].buffer = record.bytes;
-        bind_update_sums_in[0].buffer_length = record.l_bytes;
-        bind_update_sums_in[0].is_null = 0;
-        bind_update_sums_in[0].length = &record.l_bytes;
-
-	// Date
-        bind_update_sums_in[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_in[1].buffer = record.date;
-        bind_update_sums_in[1].buffer_length = record.l_date;
-        bind_update_sums_in[1].is_null = 0;
-        bind_update_sums_in[1].length = &record.l_date;
-
-	// IP in net short format
-        bind_update_sums_in[2].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_in[2].buffer = record.ipns;
-        bind_update_sums_in[2].buffer_length = record.l_ipns;
-        bind_update_sums_in[2].is_null = 0;
-        bind_update_sums_in[2].length = &record.l_ipns;
-
-	// The site ID
-        bind_update_sums_in[3].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_in[3].buffer = record.siteid;
-        bind_update_sums_in[3].buffer_length = record.l_siteid;
-        bind_update_sums_in[3].is_null = 0;
-        bind_update_sums_in[3].length = &record.l_siteid;
-
-	// The User ID
-        bind_update_sums_in[4].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_in[4].buffer = record.usersid;
-        bind_update_sums_in[4].buffer_length = record.l_usersid;
-        bind_update_sums_in[4].is_null = 0;
-        bind_update_sums_in[4].length = &record.l_usersid;
-
-	        // Summary Time
-        bind_update_sums_in[5].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_in[5].buffer = record.sumtime;
-        bind_update_sums_in[5].buffer_length = record.l_sumtime;
-        bind_update_sums_in[5].is_null = 0;
-        bind_update_sums_in[5].length = &record.l_sumtime;
-
-
-        if (mysql_stmt_bind_param(update_sums_in, bind_update_sums_in) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(update_sums_in));
-
-
-// Statement Type:      UPDATE
-// Statement Name:	xSTMT_UPDSUMS_OUT	"UPDATE trafficSummaries SET outCache=outCache+? WHERE date=? AND ip=? AND sitesID=? AND usersID=? AND summaryTime=?"
-// Table:               trafficSummaries
-// Function:            Update the outCache fields.
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(update_sums_out, xSTMT_UPDSUMS_OUT, sizeof(xSTMT_UPDSUMS_OUT));
-
-
-        memset(bind_update_sums_out, 0, sizeof(bind_update_sums_out));
-
-	// data size
-        bind_update_sums_out[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_out[0].buffer = record.bytes;
-        bind_update_sums_out[0].buffer_length = record.l_bytes;
-        bind_update_sums_out[0].is_null = 0;
-        bind_update_sums_out[0].length = &record.l_bytes;
-
-	// date
-        bind_update_sums_out[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_out[1].buffer = record.date;
-        bind_update_sums_out[1].buffer_length = record.l_date;
-        bind_update_sums_out[1].is_null = 0;
-        bind_update_sums_out[1].length = &record.l_date;
-
-	// ip net short
-        bind_update_sums_out[2].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_out[2].buffer = record.ipns;
-        bind_update_sums_out[2].buffer_length = record.l_ipns;
-        bind_update_sums_out[2].is_null = 0;
-        bind_update_sums_out[2].length = &record.l_ipns;
-
-	// sites ID
-        bind_update_sums_out[3].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_out[3].buffer = record.siteid;
-        bind_update_sums_out[3].buffer_length = record.l_siteid;
-        bind_update_sums_out[3].is_null = 0;
-        bind_update_sums_out[3].length = &record.l_siteid;
-
-	// users ID
-        bind_update_sums_out[4].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_out[4].buffer = record.usersid;
-        bind_update_sums_out[4].buffer_length = record.l_usersid;
-        bind_update_sums_out[4].is_null = 0;
-        bind_update_sums_out[4].length = &record.l_usersid;
-
-	// summary time
-        bind_update_sums_out[5].buffer_type = MYSQL_TYPE_STRING;
-        bind_update_sums_out[5].buffer = record.sumtime;
-        bind_update_sums_out[5].buffer_length = record.l_sumtime;
-        bind_update_sums_out[5].is_null = 0;
-        bind_update_sums_out[5].length = &record.l_sumtime;
-
-        if (mysql_stmt_bind_param(update_sums_out, bind_update_sums_out) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(update_sums_out));
-
-
-// Statement Type:      INSERT
-// Statement Name:	xSTMT_INSSUMS_IN	"INSERT INTO trafficSummaries(date,ip,inCache,sitesID,usersID,summaryTime) VALUES (?,?,?,?,?,?)"
-// Table:               trafficSummaries
-// Function:            Add a record to table when UPDATE fails a positive affected row count.
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(insert_sums_in,xSTMT_INSSUMS_IN, sizeof(xSTMT_INSSUMS_IN));
-
-
-        memset(bind_insert_sums_in, 0, sizeof(bind_insert_sums_in));
-
-	// date
-        bind_insert_sums_in[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_in[0].buffer = record.date;
-        bind_insert_sums_in[0].buffer_length = record.l_date;
-        bind_insert_sums_in[0].is_null = 0;
-        bind_insert_sums_in[0].length = &record.l_date;
-
-	// IP in net short format
-        bind_insert_sums_in[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_in[1].buffer = record.ipns;
-        bind_insert_sums_in[1].buffer_length = record.l_ipns;
-        bind_insert_sums_in[1].is_null = 0;
-        bind_insert_sums_in[1].length = &record.l_ipns;
-
-	// bytes to sum inCache
-        bind_insert_sums_in[2].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_in[2].buffer = record.bytes;
-        bind_insert_sums_in[2].buffer_length = record.l_bytes;
-        bind_insert_sums_in[2].is_null = 0;
-        bind_insert_sums_in[2].length = &record.l_bytes;
-
-	// Sites ID
-        bind_insert_sums_in[3].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_in[3].buffer = record.siteid;
-        bind_insert_sums_in[3].buffer_length = record.l_siteid;
-        bind_insert_sums_in[3].is_null = 0;
-        bind_insert_sums_in[3].length = &record.l_siteid;
-
-	// Users ID
-        bind_insert_sums_in[4].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_in[4].buffer = record.usersid;
-        bind_insert_sums_in[4].buffer_length = record.l_usersid;
-        bind_insert_sums_in[4].is_null = 0;
-        bind_insert_sums_in[4].length = &record.l_usersid;
-
-	// Summary Time
-        bind_insert_sums_in[5].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_in[5].buffer = record.sumtime;
-        bind_insert_sums_in[5].buffer_length = record.l_sumtime;
-        bind_insert_sums_in[5].is_null = 0;
-        bind_insert_sums_in[5].length = &record.l_sumtime;
-
-        if (mysql_stmt_bind_param(insert_sums_in, bind_insert_sums_in) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(insert_sums_in));
-
-
-// Statement Type:      INSERT
-// Statement Name:	xSTMT_INSSUMS_OUT	"INSERT INTO trafficSummaries(date,ip,outCache,sitesID,usersID,summaryTime) VALUES (?,?,?,?,?,?)"
-// Table:               trafficSummaries
-// Function:            Add a record to table when UPDATE fails a positive affected row count.
-//
-// Status:		ADAPTED and WORKING
-
-        MySAR_prepare_stmt(insert_sums_out,xSTMT_INSSUMS_OUT, sizeof(xSTMT_INSSUMS_OUT));
-
-
-        memset(bind_insert_sums_out, 0, sizeof(bind_insert_sums_out));
-
-	// date
-        bind_insert_sums_out[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_out[0].buffer = record.date;
-        bind_insert_sums_out[0].buffer_length = record.l_date;
-        bind_insert_sums_out[0].is_null = 0;
-        bind_insert_sums_out[0].length = &record.l_date;
-
-	// IP in net short format
-        bind_insert_sums_out[1].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_out[1].buffer = record.ipns;
-        bind_insert_sums_out[1].buffer_length = record.l_ipns;
-        bind_insert_sums_out[1].is_null = 0;
-        bind_insert_sums_out[1].length = &record.l_ipns;
-
-	// bytes to sum outCache
-        bind_insert_sums_out[2].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_out[2].buffer = record.bytes;
-        bind_insert_sums_out[2].buffer_length = record.l_bytes;
-        bind_insert_sums_out[2].is_null = 0;
-        bind_insert_sums_out[2].length = &record.l_bytes;
-
-	// Sites ID
-        bind_insert_sums_out[3].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_out[3].buffer = record.siteid;
-        bind_insert_sums_out[3].buffer_length = record.l_siteid;
-        bind_insert_sums_out[3].is_null = 0;
-        bind_insert_sums_out[3].length = &record.l_siteid;
-
-	// Users ID
-        bind_insert_sums_out[4].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_out[4].buffer = record.usersid;
-        bind_insert_sums_out[4].buffer_length = record.l_usersid;
-        bind_insert_sums_out[4].is_null = 0;
-        bind_insert_sums_out[4].length = &record.l_usersid;
-
-	// Summary Time
-        bind_insert_sums_out[5].buffer_type = MYSQL_TYPE_STRING;
-        bind_insert_sums_out[5].buffer = record.sumtime;
-        bind_insert_sums_out[5].buffer_length = record.l_sumtime;
-        bind_insert_sums_out[5].is_null = 0;
-        bind_insert_sums_out[5].length = &record.l_sumtime;
-
-        if (mysql_stmt_bind_param(insert_sums_out, bind_insert_sums_out) != 0)
-                MySAR_print(MSG_ERROR, "mysql_stmt_bind_param Failed!() %s", mysql_stmt_error(insert_sums_out));
-
-
-	// select statements return values
-        memset(bind_output, 0, sizeof(bind_output));
-
-        bind_output[0].buffer_type = MYSQL_TYPE_STRING;
-        bind_output[0].buffer = bind_data;
-        bind_output[0].buffer_length = 50; //strlen(&bind_data);
-        bind_output[0].is_null = 0;
-        bind_output[0].length = &len[0];
-
-	return;
+	// Force reinitialization of the connection to ensure a clean state
+	if (mysql) {
+		mysql_close(mysql);
+	}
+	mysql = mysql_init(NULL);
+	if (!mysql) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_init() failed in MySAR_prep_mysql: %s", mysql_error(NULL));
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	// Set connection options for compatibility
+	mysql_options(mysql, MYSQL_OPT_RECONNECT, &(my_bool){1});
+	if (!mysql_real_connect(mysql, config->dbserver, config->dbuser, config->dbpass, config->dbname, 0, NULL, CLIENT_FOUND_ROWS)) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_real_connect() failed in MySAR_prep_mysql: %s", mysql_error(mysql));
+		mysql_close(mysql);
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Reinitialized MySQL connection for statement preparation.");
+
+	// Verify connection pointer before initializing statements
+	if (mysql == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: MySQL connection pointer is NULL before stmt_init");
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Initialize and prepare the Statements one by one with detailed debugging
+	MySAR_print(MSG_DEBUG, "Initializing insert_traffic statement...");
+	insert_traffic = mysql_stmt_init(mysql);
+	if (insert_traffic == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for insert_traffic: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing insert_traffic statement...");
+	if (insert_traffic == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: insert_traffic is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(insert_traffic, xSTMT_INSTRAFFIC, sizeof(xSTMT_INSTRAFFIC));
+
+	MySAR_print(MSG_DEBUG, "Initializing insert_resolved statement...");
+	insert_resolved = mysql_stmt_init(mysql);
+	if (insert_resolved == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for insert_resolved: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing insert_resolved statement...");
+	if (insert_resolved == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: insert_resolved is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(insert_resolved, xSTMT_INSRESOLVED, sizeof(xSTMT_INSRESOLVED));
+
+	MySAR_print(MSG_DEBUG, "Initializing select_resolved statement...");
+	select_resolved = mysql_stmt_init(mysql);
+	if (select_resolved == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for select_resolved: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing select_resolved statement...");
+	if (select_resolved == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: select_resolved is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(select_resolved, xSTMT_SELRESOLVED, sizeof(xSTMT_SELRESOLVED));
+
+	MySAR_print(MSG_DEBUG, "Initializing insert_sites statement...");
+	insert_sites = mysql_stmt_init(mysql);
+	if (insert_sites == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for insert_sites: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing insert_sites statement...");
+	if (insert_sites == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: insert_sites is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(insert_sites, xSTMT_INSSITES, sizeof(xSTMT_INSSITES));
+
+	MySAR_print(MSG_DEBUG, "Initializing select_sites statement...");
+	select_sites = mysql_stmt_init(mysql);
+	if (select_sites == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for select_sites: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing select_sites statement...");
+	if (select_sites == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: select_sites is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(select_sites, xSTMT_SELSITES, sizeof(xSTMT_SELSITES));
+
+	MySAR_print(MSG_DEBUG, "Initializing insert_users statement...");
+	insert_users = mysql_stmt_init(mysql);
+	if (insert_users == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for insert_users: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing insert_users statement...");
+	if (insert_users == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: insert_users is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(insert_users, xSTMT_INSUSERS, sizeof(xSTMT_INSUSERS));
+
+	MySAR_print(MSG_DEBUG, "Initializing select_users statement...");
+	select_users = mysql_stmt_init(mysql);
+	if (select_users == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for select_users: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing select_users statement...");
+	if (select_users == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: select_users is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(select_users, xSTMT_SELUSERS, sizeof(xSTMT_SELUSERS));
+
+	MySAR_print(MSG_DEBUG, "Initializing update_sums_in statement...");
+	update_sums_in = mysql_stmt_init(mysql);
+	if (update_sums_in == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for update_sums_in: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing update_sums_in statement...");
+	if (update_sums_in == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: update_sums_in is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(update_sums_in, xSTMT_UPDSUMS_IN, sizeof(xSTMT_UPDSUMS_IN));
+
+	MySAR_print(MSG_DEBUG, "Initializing update_sums_out statement...");
+	update_sums_out = mysql_stmt_init(mysql);
+	if (update_sums_out == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for update_sums_out: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing update_sums_out statement...");
+	if (update_sums_out == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: update_sums_out is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(update_sums_out, xSTMT_UPDSUMS_OUT, sizeof(xSTMT_UPDSUMS_OUT));
+
+	MySAR_print(MSG_DEBUG, "Initializing insert_sums_in statement...");
+	insert_sums_in = mysql_stmt_init(mysql);
+	if (insert_sums_in == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for insert_sums_in: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing insert_sums_in statement...");
+	if (insert_sums_in == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: insert_sums_in is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(insert_sums_in, xSTMT_INSSUMS_IN, sizeof(xSTMT_INSSUMS_IN));
+
+	MySAR_print(MSG_DEBUG, "Initializing insert_sums_out statement...");
+	insert_sums_out = mysql_stmt_init(mysql);
+	if (insert_sums_out == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_init failed for insert_sums_out: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_print(MSG_DEBUG, "Preparing insert_sums_out statement...");
+	if (insert_sums_out == NULL) {
+		MySAR_print(MSG_ERROR, "FATAL: insert_sums_out is NULL after mysql_stmt_init: %s", mysql_error(mysql));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	MySAR_prepare_stmt(insert_sums_out, xSTMT_INSSUMS_OUT, sizeof(xSTMT_INSSUMS_OUT));
+
+	// Configure bindings for insert_traffic
+	MySAR_print(MSG_DEBUG, "Configuring bindings for insert_traffic...");
+	if (!record.date || !record.time || !record.siteid || !record.usersid || !record.ipns ||
+	    !record.result || !record.bytes || !record.url || !record.authuser) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for insert_traffic");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_insert_traffic, 0, sizeof(bind_insert_traffic));
+	bind_insert_traffic[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[0].buffer = record.date;
+	bind_insert_traffic[0].buffer_length = record.l_date;
+	bind_insert_traffic[0].is_null = 0;
+	bind_insert_traffic[0].length = &record.l_date;
+
+	bind_insert_traffic[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[1].buffer = record.time;
+	bind_insert_traffic[1].buffer_length = record.l_time;
+	bind_insert_traffic[1].is_null = 0;
+	bind_insert_traffic[1].length = &record.l_time;
+
+	bind_insert_traffic[2].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[2].buffer = record.siteid;
+	bind_insert_traffic[2].buffer_length = record.l_siteid;
+	bind_insert_traffic[2].is_null = 0;
+	bind_insert_traffic[2].length = &record.l_siteid;
+
+	bind_insert_traffic[3].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[3].buffer = record.usersid;
+	bind_insert_traffic[3].buffer_length = record.l_usersid;
+	bind_insert_traffic[3].is_null = 0;
+	bind_insert_traffic[3].length = &record.l_usersid;
+
+	bind_insert_traffic[4].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[4].buffer = record.ipns;
+	bind_insert_traffic[4].buffer_length = record.l_ipns;
+	bind_insert_traffic[4].is_null = 0;
+	bind_insert_traffic[4].length = &record.l_ipns;
+
+	bind_insert_traffic[5].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[5].buffer = record.result;
+	bind_insert_traffic[5].buffer_length = record.l_result;
+	bind_insert_traffic[5].is_null = 0;
+	bind_insert_traffic[5].length = &record.l_result;
+
+	bind_insert_traffic[6].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[6].buffer = record.bytes;
+	bind_insert_traffic[6].buffer_length = record.l_bytes;
+	bind_insert_traffic[6].is_null = 0;
+	bind_insert_traffic[6].length = &record.l_bytes;
+
+	bind_insert_traffic[7].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[7].buffer = record.url;
+	bind_insert_traffic[7].buffer_length = record.l_url;
+	bind_insert_traffic[7].is_null = 0;
+	bind_insert_traffic[7].length = &record.l_url;
+
+	bind_insert_traffic[8].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_traffic[8].buffer = record.authuser;
+	bind_insert_traffic[8].buffer_length = record.l_authuser;
+	bind_insert_traffic[8].is_null = 0;
+	bind_insert_traffic[8].length = &record.l_authuser;
+
+	if (mysql_stmt_bind_param(insert_traffic, bind_insert_traffic) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for insert_traffic: %s", mysql_stmt_error(insert_traffic));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for select_resolved
+	MySAR_print(MSG_DEBUG, "Configuring bindings for select_resolved...");
+	if (!record.ipns) {
+		MySAR_print(MSG_ERROR, "FATAL: record.ipns is NULL for select_resolved");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_select_resolved, 0, sizeof(bind_select_resolved));
+	bind_select_resolved[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_select_resolved[0].buffer = record.ipns;
+	bind_select_resolved[0].buffer_length = record.l_ipns;
+	bind_select_resolved[0].is_null = 0;
+	bind_select_resolved[0].length = &record.l_ipns;
+
+	if (mysql_stmt_bind_param(select_resolved, bind_select_resolved) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for select_resolved: %s", mysql_stmt_error(select_resolved));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for insert_resolved
+	MySAR_print(MSG_DEBUG, "Configuring bindings for insert_resolved...");
+	if (!record.ipns || !record.hostname || !record.isResolved) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for insert_resolved");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_insert_resolved, 0, sizeof(bind_insert_resolved));
+	bind_insert_resolved[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_resolved[0].buffer = record.ipns;
+	bind_insert_resolved[0].buffer_length = record.l_ipns;
+	bind_insert_resolved[0].is_null = 0;
+	bind_insert_resolved[0].length = &record.l_ipns;
+
+	bind_insert_resolved[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_resolved[1].buffer = record.hostname;
+	bind_insert_resolved[1].buffer_length = record.l_hostname;
+	bind_insert_resolved[1].is_null = 0;
+	bind_insert_resolved[1].length = &record.l_hostname;
+
+	bind_insert_resolved[2].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_resolved[2].buffer = record.isResolved;
+	bind_insert_resolved[2].buffer_length = record.l_isResolved;
+	bind_insert_resolved[2].is_null = 0;
+	bind_insert_resolved[2].length = &record.l_isResolved;
+
+	if (mysql_stmt_bind_param(insert_resolved, bind_insert_resolved) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for insert_resolved: %s", mysql_stmt_error(insert_resolved));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for select_sites
+	MySAR_print(MSG_DEBUG, "Configuring bindings for select_sites...");
+	if (!record.date || !record.site) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for select_sites");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_select_sites, 0, sizeof(bind_select_sites));
+	bind_select_sites[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_select_sites[0].buffer = record.date;
+	bind_select_sites[0].buffer_length = record.l_date;
+	bind_select_sites[0].is_null = 0;
+	bind_select_sites[0].length = &record.l_date;
+
+	bind_select_sites[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_select_sites[1].buffer = record.site;
+	bind_select_sites[1].buffer_length = record.l_site;
+	bind_select_sites[1].is_null = 0;
+	bind_select_sites[1].length = &record.l_site;
+
+	if (mysql_stmt_bind_param(select_sites, bind_select_sites) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for select_sites: %s", mysql_stmt_error(select_sites));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for insert_sites
+	MySAR_print(MSG_DEBUG, "Configuring bindings for insert_sites...");
+	if (!record.site || !record.date) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for insert_sites");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_insert_sites, 0, sizeof(bind_insert_sites));
+	bind_insert_sites[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sites[0].buffer = record.site;
+	bind_insert_sites[0].buffer_length = record.l_site;
+	bind_insert_sites[0].is_null = 0;
+	bind_insert_sites[0].length = &record.l_site;
+
+	bind_insert_sites[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sites[1].buffer = record.date;
+	bind_insert_sites[1].buffer_length = record.l_date;
+	bind_insert_sites[1].is_null = 0;
+	bind_insert_sites[1].length = &record.l_date;
+
+	if (mysql_stmt_bind_param(insert_sites, bind_insert_sites) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for insert_sites: %s", mysql_stmt_error(insert_sites));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for insert_users
+	MySAR_print(MSG_DEBUG, "Configuring bindings for insert_users...");
+	if (!record.authuser || !record.date) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for insert_users");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_insert_users, 0, sizeof(bind_insert_users));
+	bind_insert_users[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_users[0].buffer = record.authuser;
+	bind_insert_users[0].buffer_length = record.l_authuser;
+	bind_insert_users[0].is_null = 0;
+	bind_insert_users[0].length = &record.l_authuser;
+
+	bind_insert_users[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_users[1].buffer = record.date;
+	bind_insert_users[1].buffer_length = record.l_date;
+	bind_insert_users[1].is_null = 0;
+	bind_insert_users[1].length = &record.l_date;
+
+	if (mysql_stmt_bind_param(insert_users, bind_insert_users) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for insert_users: %s", mysql_stmt_error(insert_users));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for select_users
+	MySAR_print(MSG_DEBUG, "Configuring bindings for select_users...");
+	if (!record.date || !record.authuser) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for select_users");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_select_users, 0, sizeof(bind_select_users));
+	bind_select_users[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_select_users[0].buffer = record.date;
+	bind_select_users[0].buffer_length = record.l_date;
+	bind_select_users[0].is_null = 0;
+	bind_select_users[0].length = &record.l_date;
+
+	bind_select_users[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_select_users[1].buffer = record.authuser;
+	bind_select_users[1].buffer_length = record.l_authuser;
+	bind_select_users[1].is_null = 0;
+	bind_select_users[1].length = &record.l_authuser;
+
+	if (mysql_stmt_bind_param(select_users, bind_select_users) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for select_users: %s", mysql_stmt_error(select_users));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for update_sums_in
+	MySAR_print(MSG_DEBUG, "Configuring bindings for update_sums_in...");
+	if (!record.bytes || !record.date || !record.ipns || !record.siteid || !record.usersid || !record.sumtime) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for update_sums_in");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_update_sums_in, 0, sizeof(bind_update_sums_in));
+	bind_update_sums_in[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_in[0].buffer = record.bytes;
+	bind_update_sums_in[0].buffer_length = record.l_bytes;
+	bind_update_sums_in[0].is_null = 0;
+	bind_update_sums_in[0].length = &record.l_bytes;
+
+	bind_update_sums_in[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_in[1].buffer = record.date;
+	bind_update_sums_in[1].buffer_length = record.l_date;
+	bind_update_sums_in[1].is_null = 0;
+	bind_update_sums_in[1].length = &record.l_date;
+
+	bind_update_sums_in[2].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_in[2].buffer = record.ipns;
+	bind_update_sums_in[2].buffer_length = record.l_ipns;
+	bind_update_sums_in[2].is_null = 0;
+	bind_update_sums_in[2].length = &record.l_ipns;
+
+	bind_update_sums_in[3].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_in[3].buffer = record.siteid;
+	bind_update_sums_in[3].buffer_length = record.l_siteid;
+	bind_update_sums_in[3].is_null = 0;
+	bind_update_sums_in[3].length = &record.l_siteid;
+
+	bind_update_sums_in[4].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_in[4].buffer = record.usersid;
+	bind_update_sums_in[4].buffer_length = record.l_usersid;
+	bind_update_sums_in[4].is_null = 0;
+	bind_update_sums_in[4].length = &record.l_usersid;
+
+	bind_update_sums_in[5].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_in[5].buffer = record.sumtime;
+	bind_update_sums_in[5].buffer_length = record.l_sumtime;
+	bind_update_sums_in[5].is_null = 0;
+	bind_update_sums_in[5].length = &record.l_sumtime;
+
+	if (mysql_stmt_bind_param(update_sums_in, bind_update_sums_in) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for update_sums_in: %s", mysql_stmt_error(update_sums_in));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for update_sums_out
+	MySAR_print(MSG_DEBUG, "Configuring bindings for update_sums_out...");
+	if (!record.bytes || !record.date || !record.ipns || !record.siteid || !record.usersid || !record.sumtime) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for update_sums_out");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_update_sums_out, 0, sizeof(bind_update_sums_out));
+	bind_update_sums_out[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_out[0].buffer = record.bytes;
+	bind_update_sums_out[0].buffer_length = record.l_bytes;
+	bind_update_sums_out[0].is_null = 0;
+	bind_update_sums_out[0].length = &record.l_bytes;
+
+	bind_update_sums_out[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_out[1].buffer = record.date;
+	bind_update_sums_out[1].buffer_length = record.l_date;
+	bind_update_sums_out[1].is_null = 0;
+	bind_update_sums_out[1].length = &record.l_date;
+
+	bind_update_sums_out[2].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_out[2].buffer = record.ipns;
+	bind_update_sums_out[2].buffer_length = record.l_ipns;
+	bind_update_sums_out[2].is_null = 0;
+	bind_update_sums_out[2].length = &record.l_ipns;
+
+	bind_update_sums_out[3].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_out[3].buffer = record.siteid;
+	bind_update_sums_out[3].buffer_length = record.l_siteid;
+	bind_update_sums_out[3].is_null = 0;
+	bind_update_sums_out[3].length = &record.l_siteid;
+
+	bind_update_sums_out[4].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_out[4].buffer = record.usersid;
+	bind_update_sums_out[4].buffer_length = record.l_usersid;
+	bind_update_sums_out[4].is_null = 0;
+	bind_update_sums_out[4].length = &record.l_usersid;
+
+	bind_update_sums_out[5].buffer_type = MYSQL_TYPE_STRING;
+	bind_update_sums_out[5].buffer = record.sumtime;
+	bind_update_sums_out[5].buffer_length = record.l_sumtime;
+	bind_update_sums_out[5].is_null = 0;
+	bind_update_sums_out[5].length = &record.l_sumtime;
+
+	if (mysql_stmt_bind_param(update_sums_out, bind_update_sums_out) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for update_sums_out: %s", mysql_stmt_error(update_sums_out));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for insert_sums_in
+	MySAR_print(MSG_DEBUG, "Configuring bindings for insert_sums_in...");
+	if (!record.date || !record.ipns || !record.bytes || !record.siteid || !record.usersid || !record.sumtime) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for insert_sums_in");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_insert_sums_in, 0, sizeof(bind_insert_sums_in));
+	bind_insert_sums_in[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_in[0].buffer = record.date;
+	bind_insert_sums_in[0].buffer_length = record.l_date;
+	bind_insert_sums_in[0].is_null = 0;
+	bind_insert_sums_in[0].length = &record.l_date;
+
+	bind_insert_sums_in[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_in[1].buffer = record.ipns;
+	bind_insert_sums_in[1].buffer_length = record.l_ipns;
+	bind_insert_sums_in[1].is_null = 0;
+	bind_insert_sums_in[1].length = &record.l_ipns;
+
+	bind_insert_sums_in[2].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_in[2].buffer = record.bytes;
+	bind_insert_sums_in[2].buffer_length = record.l_bytes;
+	bind_insert_sums_in[2].is_null = 0;
+	bind_insert_sums_in[2].length = &record.l_bytes;
+
+	bind_insert_sums_in[3].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_in[3].buffer = record.siteid;
+	bind_insert_sums_in[3].buffer_length = record.l_siteid;
+	bind_insert_sums_in[3].is_null = 0;
+	bind_insert_sums_in[3].length = &record.l_siteid;
+
+	bind_insert_sums_in[4].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_in[4].buffer = record.usersid;
+	bind_insert_sums_in[4].buffer_length = record.l_usersid;
+	bind_insert_sums_in[4].is_null = 0;
+	bind_insert_sums_in[4].length = &record.l_usersid;
+
+	bind_insert_sums_in[5].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_in[5].buffer = record.sumtime;
+	bind_insert_sums_in[5].buffer_length = record.l_sumtime;
+	bind_insert_sums_in[5].is_null = 0;
+	bind_insert_sums_in[5].length = &record.l_sumtime;
+
+	if (mysql_stmt_bind_param(insert_sums_in, bind_insert_sums_in) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for insert_sums_in: %s", mysql_stmt_error(insert_sums_in));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for insert_sums_out
+	MySAR_print(MSG_DEBUG, "Configuring bindings for insert_sums_out...");
+	if (!record.date || !record.ipns || !record.bytes || !record.siteid || !record.usersid || !record.sumtime) {
+		MySAR_print(MSG_ERROR, "FATAL: One or more record fields are NULL for insert_sums_out");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_insert_sums_out, 0, sizeof(bind_insert_sums_out));
+	bind_insert_sums_out[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_out[0].buffer = record.date;
+	bind_insert_sums_out[0].buffer_length = record.l_date;
+	bind_insert_sums_out[0].is_null = 0;
+	bind_insert_sums_out[0].length = &record.l_date;
+
+	bind_insert_sums_out[1].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_out[1].buffer = record.ipns;
+	bind_insert_sums_out[1].buffer_length = record.l_ipns;
+	bind_insert_sums_out[1].is_null = 0;
+	bind_insert_sums_out[1].length = &record.l_ipns;
+
+	bind_insert_sums_out[2].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_out[2].buffer = record.bytes;
+	bind_insert_sums_out[2].buffer_length = record.l_bytes;
+	bind_insert_sums_out[2].is_null = 0;
+	bind_insert_sums_out[2].length = &record.l_bytes;
+
+	bind_insert_sums_out[3].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_out[3].buffer = record.siteid;
+	bind_insert_sums_out[3].buffer_length = record.l_siteid;
+	bind_insert_sums_out[3].is_null = 0;
+	bind_insert_sums_out[3].length = &record.l_siteid;
+
+	bind_insert_sums_out[4].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_out[4].buffer = record.usersid;
+	bind_insert_sums_out[4].buffer_length = record.l_usersid;
+	bind_insert_sums_out[4].is_null = 0;
+	bind_insert_sums_out[4].length = &record.l_usersid;
+
+	bind_insert_sums_out[5].buffer_type = MYSQL_TYPE_STRING;
+	bind_insert_sums_out[5].buffer = record.sumtime;
+	bind_insert_sums_out[5].buffer_length = record.l_sumtime;
+	bind_insert_sums_out[5].is_null = 0;
+	bind_insert_sums_out[5].length = &record.l_sumtime;
+
+	if (mysql_stmt_bind_param(insert_sums_out, bind_insert_sums_out) != 0) {
+		MySAR_print(MSG_ERROR, "FATAL: mysql_stmt_bind_param failed for insert_sums_out: %s", mysql_stmt_error(insert_sums_out));
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+
+	// Configure bindings for output
+	MySAR_print(MSG_DEBUG, "Configuring bindings for output...");
+	if (!bind_data) {
+		MySAR_print(MSG_ERROR, "FATAL: bind_data is NULL for output");
+		MySAR_db_shutdown();
+		MySAR_unlock_host();
+		exit(EXIT_FAILURE);
+	}
+	memset(bind_output, 0, sizeof(bind_output));
+	bind_output[0].buffer_type = MYSQL_TYPE_STRING;
+	bind_output[0].buffer = bind_data;
+	bind_output[0].buffer_length = 50;
+	bind_output[0].is_null = 0;
+	bind_output[0].length = &len[0];
 }

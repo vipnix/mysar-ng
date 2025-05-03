@@ -1,6 +1,6 @@
 /*
  Program: mysar, File: unzip.c
- Copyright 2007, Cassiano Martin <cassiano@polaco.pro.br>
+ BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br
   
  This file is part of mysar.
 

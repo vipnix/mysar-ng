@@ -1,6 +1,6 @@
 /*
  Program: mysar, File: mysar.c
- Copyright 2007, Cassiano Martin <cassiano@polaco.pro.br>
+ BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br
 
  Source is based on MySar 1.x importer, written by David 'scuzzy' Todd <mobilepolice@gmail.com>
 
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 #else
 	MySAR_print(MSG_NOTICE, "MySAR %s Log importer, 32 bit Version", PACKAGE_VERSION);
 #endif
-	MySAR_print(MSG_NOTICE, "Copyright 2007 Cassiano Martin\n");
+	MySAR_print(MSG_NOTICE, "BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br\n");
 
 
 	// read configuration from file

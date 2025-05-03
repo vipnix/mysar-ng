@@ -1,6 +1,6 @@
 /*
  Program: mysar, File: database.c
- Copyright 2007, Cassiano Martin <cassiano@polaco.pro.br>
+ BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br
 
  Source is based on MySar 1.x importer, written by David 'scuzzy' Todd <mobilepolice@gmail.com>
 
@@ -37,17 +37,25 @@ char *cleanTables[]  = { "sites", "traffic", "trafficSummaries", "users" };
 
 void MySAR_db_startup()
 {
-	// Establish our connection to the MySQL Server.
-	mysql = mysql_init(NULL);
+    // Establish our connection to the MySQL Server.
+    mysql = mysql_init(NULL);
+    if (!mysql) {
+        MySAR_print(MSG_ERROR, "FATAL: mysql_init() failed: %s", mysql_error(NULL));
+        MySAR_unlock_host();
+        exit(EXIT_FAILURE);
+    }
 
-	if (!mysql_real_connect(mysql, config->dbserver, config->dbuser, config->dbpass, config->dbname, 0, NULL, 0))
-	{
-		MySAR_print(MSG_ERROR, "mysql_real_connect() in main() %s", mysql_error(mysql));
-	}
-	else {
-		MySAR_print(MSG_DEBUG, "Connection established to MySQL server.");
-		config->db_conn_open = 1;
-	}
+    // Set connection options for compatibility
+    mysql_options(mysql, MYSQL_OPT_RECONNECT, &(my_bool){1});
+    if (!mysql_real_connect(mysql, config->dbserver, config->dbuser, config->dbpass, config->dbname, 0, NULL, CLIENT_FOUND_ROWS)) {
+        MySAR_print(MSG_ERROR, "FATAL: mysql_real_connect() failed: %s", mysql_error(mysql));
+        mysql_close(mysql);
+        MySAR_unlock_host();
+        exit(EXIT_FAILURE);
+    }
+
+    MySAR_print(MSG_DEBUG, "Connection established to MySQL server with enhanced options.");
+    config->db_conn_open = 1;
 }
 
 void MySAR_db_rollback()
@@ -225,7 +233,4 @@ void MySAR_db_optimize()
 	}
 
 	MySAR_print(MSG_NOTICE, "Finished optimization routine.\n");
-
-	MySAR_db_shutdown();
-	exit(EXIT_SUCCESS);
 }

@@ -1,6 +1,6 @@
 /*
  Program: mysar, File: globals.h
- Copyright 2007, Cassiano Martin <cassiano@polaco.pro.br>
+ BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br
 
  Source is based on MySar 1.x importer, written by David 'scuzzy' Todd <mobilepolice@gmail.com>
 
@@ -145,11 +145,11 @@ char *MySAR_fetch_configvalue(char *);
 char *MySAR_select_field();
 void MySAR_prep_mysql();
 void MySAR_free_mysql_statements();
-extern inline void MySAR_import_traffic();
-extern inline void MySAR_import_hostnames();
-extern inline void MySAR_import_sites();
-extern inline void MySAR_import_users();
-extern inline void MySAR_import_summaries();
+void MySAR_import_traffic();
+void MySAR_import_hostnames();
+void MySAR_import_sites();
+void MySAR_import_users();
+void MySAR_import_summaries();
 long MySAR_fetch_config_long(char *name);
 int MySAR_update_config_long(long value, char *name);
 

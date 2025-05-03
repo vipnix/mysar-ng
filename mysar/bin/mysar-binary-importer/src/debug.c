@@ -1,6 +1,6 @@
 /*
  Program: mysar, File: debug.c
- Copyright 2007, Cassiano Martin <cassiano@polaco.pro.br>
+ BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br
 
  Source is based on MySar 1.x importer, written by David 'scuzzy' Todd <mobilepolice@gmail.com>
 
@@ -125,7 +125,7 @@ void MySAR_print_help(void)
         char *help_msg = {
 		"MySQL Squid Access Report (importer).\n"
 		"Adapted from code taken from the MySAR log importer.\n"
-		"Copyright 2007 Cassiano Martin\n"
+		"BSD-3-Clause License 2025 by VIPNIX https://vipnix.com.br\n"
 		"\n"
 		"Available Options:\n\n"
 		"--resolver                     this enables the DNS resolver\n"
