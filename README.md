@@ -1,9 +1,11 @@
-# mysar-ng
+MySAR-NG by VIPNIX
 
-Relatório de Acesso Squid com MySQL (nova geração)
+Relatório de Acesso Squid em MySQL (Nova Geração)
+https://vipnix.com.br
+
+MySAR-NG é uma ferramenta avançada para monitoramento e análise de logs de acesso do Squid, integrada com um banco de dados MySQL/MariaDB. Esta versão moderna oferece uma interface web intuitiva e um importador binário eficiente, projetado para processar grandes volumes de dados com desempenho otimizado. Mantida pela empresa VIPNIX e seu proprietário Raphael Bastos aka coffnix desde 2010.
 
 ![Screenshot](mysar-ng-v4.png)
-
 
 ![Screenshot](mysar-importer-c-v1.png) 
 ![Screenshot](mysar-importer-c-optimize-db.png)
