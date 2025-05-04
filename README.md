@@ -114,6 +114,17 @@ log_access deny manager
 http_access allow manager localhost
 ```
 
+**Dicas de ouro:**
+Após importar um volume grande de dados, como logs com mais de 32 dias, pode ocorrer de a limpeza só ser realizada um dia depois por design do código. Em suma: A função MySAR_db_cleanup() na versão anterior de database.c verifica if (strcmp(today, config->lastcleanup) != 0)
+Para resolver isso, execute:
+```
+echo "UPDATE mysar.config SET value = '2025-05-03' WHERE name = 'lastCleanUp';" | mysql mysar
+```
+E tente realizar a limpeza novamente debugando com:
+```
+mysar -d
+```
+
 Mais informações: RTFM \:D
 
 Squid antigo: [http://www.squid-cache.org/Doc/config/log\_access/](http://www.squid-cache.org/Doc/config/log_access/)
