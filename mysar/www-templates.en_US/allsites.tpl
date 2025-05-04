@@ -1,75 +1,133 @@
+<center>
 <nobr>[
-<a href="{$smarty.server.PHP_SELF}?a=IPSummary&date={$pageVars.date}">&lt;&lt;&lt; Back to "Hosts and Users Summary for a Specific Day"</a>
+<a href="{$smarty.server.PHP_SELF}?a=IPSummary&date={$pageVars.date}"><<< Back to Stations and Users for a Specific Day</a>
 |
 <a href="{$pageVars.uri}">Refresh this page</a>
 ]</nobr>
 
-<div class="table-responsive"><table class="table table-condensed"><tr><th style="font-size: 20px";>Sites Summary for a Specific Day</th></tr></table></div>
-<p>
-<div class="table-responsive"><table class="table table-condensed">
-  <tr><td style="font-size: 20px;">
-  <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousWeek}">&lt;&lt;</a>
-  <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.previousDate}">&lt;</a>
-  {$pageVars.thisDateFormatted}
-  <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.nextDate}">&gt;</a>
-  <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.nextWeek}">&gt;&gt;</a>
-  </td></tr>
-  <tr><td style="text-align:center;">
-  <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&date={$pageVars.today}">[ Go to today ]</a>
-  </td></tr>
-  </table></div>
-  <p>
-      [
-        <a href="{$pageVars.uri}&action=setDefaultView">
-          Set this view as the default
-        </a>
-      ]
-  <div class="table-responsive"><table class="table table-condensed">
-    <tr>
-      <th></th>
-      <th>
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.siteASC}"><img border="{$pageVars.siteASCImageBorder}" src="images/up-arrow.gif"></a>
-          {$pageVars.siteLabelStart}SITE{$pageVars.siteLabelEnd}
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.siteDESC}"><img border="{$pageVars.siteDESCImageBorder}" src="images/down-arrow.gif"></a>
-      </th>
-      <th>
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.usersASC}"><img border="{$pageVars.usersASCImageBorder}" src="images/up-arrow.gif"></a>
-          {$pageVars.usersLabelStart}USERS{$pageVars.usersLabelEnd}
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.usersDESC}"><img border="{$pageVars.usersDESCImageBorder}" src="images/down-arrow.gif"></a>
-      </th>
-      <th>
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.hostsASC}"><img border="{$pageVars.hostsASCImageBorder}" src="images/up-arrow.gif"></a>
-          {$pageVars.hostsLabelStart}HOSTS{$pageVars.hostsLabelEnd}
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.hostsDESC}"><img border="{$pageVars.hostsDESCImageBorder}" src="images/down-arrow.gif"></a>
-      </th>
-      <th>
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.bytesASC}"><img border="{$pageVars.bytesASCImageBorder}" src="images/up-arrow.gif"></a>
-          {$pageVars.bytesLabelStart}BYTES{$pageVars.bytesLabelEnd}
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.bytesDESC}"><img border="{$pageVars.bytesDESCImageBorder}" src="images/down-arrow.gif"></a>
-        <br>
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.B}">{$pageVars.BLabelStart}B{$pageVars.BLabelEnd}</a>
-        |
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.K}">{$pageVars.KLabelStart}K{$pageVars.KLabelEnd}</a>
-        |
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.M}">{$pageVars.MLabelStart}M{$pageVars.MLabelEnd}</a>
-        |
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.G}">{$pageVars.GLabelStart}G{$pageVars.GLabelEnd}</a>
+<div class="table-responsive">
+    <table class="table table-condensed">
+        <tr>
+            <th style="font-size: 20px">Sites Report for a Specific Day</th>
+        </tr>
+    </table>
+</div>
 
-      </th>
-      <th>
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.cachePercentASC}"><img border="{$pageVars.cachePercentASCImageBorder}" src="images/up-arrow.gif"></a>
-          {$pageVars.cachePercentLabelStart}CACHE PERCENT{$pageVars.cachePercentLabelEnd}
-        <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.cachePercentDESC}"><img border="{$pageVars.cachePercentDESCImageBorder}" src="images/down-arrow.gif"></a>
-      </th>
-    </tr>
-  {foreach from=$pageVars.allSites item=record}
-  <tr onMouseOver="this.bgColor='#C5D3E7';" onMouseOut="this.bgColor='#DAE3F0';">
-    <td><a href="{$smarty.server.PHP_SELF}?a=siteusers&sitesID={$record.sitesID}&date={$pageVars.date}"><b>Details</b></a></td>
-    <td style="text-align: left"><a href="{$record.site}" target="_blank">{$record.site|string_trim:80:"..."}</a></td>
-    <td>{$record.users}</td>
-    <td>{$record.hosts}</td>
-    <td>{$record.bytes|bytesToHRF:$pageVars.ByteUnit}</td>
-    <td>{$record.cachePercent}%</td>
-  </tr>
-  {/foreach}
-  </table></div>
+<div class="table-responsive">
+    <table class="table table-condensed">
+        <tr>
+            <td style="text-align: center;">
+                <a href="{$smarty.server.PHP_SELF}?a=allsites&date={$pageVars.previousWeek}" title="Back 1 Week"><<</a>
+                <a href="{$smarty.server.PHP_SELF}?a=allsites&date={$pageVars.previousDate}" title="Back 1 Day"><</a>
+                {$pageVars.thisDateFormatted}
+                <a href="{$smarty.server.PHP_SELF}?a=allsites&date={$pageVars.nextDate}" title="Forward 1 Day">></a>
+                <a href="{$smarty.server.PHP_SELF}?a=allsites&date={$pageVars.nextWeek}" title="Forward 1 Week">>></a>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">
+                <a href="{$smarty.server.PHP_SELF}?a=allsites&date={$pageVars.today}" title="Today">[ Go to Today ]</a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<p>
+<center>
+    [
+    <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.OrderMethod}&OrderBy={$pageVars.OrderBy}&ByteUnit={$pageVars.ByteUnit}&date={$pageVars.date}">
+        Keep this view as default
+    </a>
+    ]
+</center>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-condensed" style="width: 100%;">
+        <tr>
+            <th style="width: 15%; text-align: center;"></th>
+            <th style="width: 35%; text-align: center;">
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.siteASC|default:'0'}">
+                    <img border="{$pageVars.siteASCImageBorder|default:'0'}" src="images/up-arrow.gif" class="img-with-border">
+                </a>
+                {$pageVars.siteLabelStart|default:'0'}SITE{$pageVars.siteLabelEnd|default:'0'}
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.siteDESC|default:'0'}">
+                    <img border="{$pageVars.siteDESCImageBorder|default:'0'}" src="images/down-arrow.gif" class="img-with-border">
+                </a>
+            </th>
+            <th style="width: 15%; text-align: center;">
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.usersASC|default:'0'}">
+                    <img border="{$pageVars.usersASCImageBorder|default:'0'}" src="images/up-arrow.gif" class="img-with-border">
+                </a>
+                {$pageVars.usersLabelStart|default:'0'}USERS{$pageVars.usersLabelEnd|default:'0'}
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.usersDESC|default:'0'}">
+                    <img border="{$pageVars.usersDESCImageBorder|default:'0'}" src="images/down-arrow.gif" class="img-with-border">
+                </a>
+            </th>
+            <th style="width: 15%; text-align: center;">
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.hostsASC|default:'0'}">
+                    <img border="{$pageVars.hostsASCImageBorder|default:'0'}" src="images/up-arrow.gif" class="img-with-border">
+                </a>
+                {$pageVars.hostsLabelStart|default:'0'}STATIONS{$pageVars.hostsLabelEnd|default:'0'}
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.hostsDESC|default:'0'}">
+                    <img border="{$pageVars.hostsDESCImageBorder|default:'0'}" src="images/down-arrow.gif" class="img-with-border">
+                </a>
+            </th>
+            <th colspan="2" style="width: 30%; text-align: center;">TRAFFIC</th>
+        </tr>
+        <tr>
+            <th style="width: 15%; text-align: center;"></th>
+            <th style="width: 35%; text-align: center;"></th>
+            <th style="width: 15%; text-align: center;"></th>
+            <th style="width: 15%; text-align: center;"></th>
+            <th style="width: 15%; text-align: center;">
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.bytesASC|default:'0'}">
+                    <img border="{$pageVars.bytesASCImageBorder|default:'0'}" src="images/up-arrow.gif" class="img-with-border">
+                </a>
+                {$pageVars.bytesLabelStart|default:'0'}BYTES{$pageVars.bytesLabelEnd|default:'0'}
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.bytesDESC|default:'0'}">
+                    <img border="{$pageVars.bytesDESCImageBorder|default:'0'}" src="images/down-arrow.gif" class="img-with-border">
+                </a>
+                <br>
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.B|default:'0'}">{$pageVars.BLabelStart|default:'0'}B{$pageVars.BLabelEnd|default:'0'}</a>
+                |
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.K|default:'0'}">{$pageVars.KLabelStart|default:'0'}K{$pageVars.KLabelEnd|default:'0'}</a>
+                |
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.M|default:'0'}">{$pageVars.MLabelStart|default:'0'}M{$pageVars.MLabelEnd|default:'0'}</a>
+                |
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.G|default:'0'}">{$pageVars.GLabelStart|default:'0'}G{$pageVars.GLabelEnd|default:'0'}</a>
+            </th>
+            <th style="width: 15%; text-align: center;">
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.cachePercentASC|default:'0'}">
+                    <img border="{$pageVars.cachePercentASCImageBorder|default:'0'}" src="images/up-arrow.gif" class="img-with-border">
+                </a>
+                {$pageVars.cachePercentLabelStart|default:'0'}CACHE USAGE{$pageVars.cachePercentLabelEnd|default:'0'}
+                <a href="{$smarty.server.PHP_SELF}?{$pageVars.url.cachePercentDESC|default:'0'}">
+                    <img border="{$pageVars.cachePercentDESCImageBorder|default:'0'}" src="images/down-arrow.gif" class="img-with-border">
+                </a>
+            </th>
+        </tr>
+        {assign var=bytesTotal value="0"}
+        {foreach from=$pageVars.allSites item=record}
+            <tr onMouseOver="this.bgColor='#C5D3E7';" onMouseOut="this.bgColor='#DAE3F0';">
+                <td style="width: 15%; text-align: center;"><a href='{$smarty.server.PHP_SELF}?a=siteusers&sitesID={$record.sitesID}&date={$pageVars.date}'><b>Details</b></a></td>
+                <td style="width: 35%; text-align: left;"><a href="{$record.site}" target="_blank">{$record.site|string_trim:80:"..."}</a></td>
+                <td style="width: 15%; text-align: center;">{$record.users}</td>
+                <td style="width: 15%; text-align: center;">{$record.hosts}</td>
+                <td style="width: 15%; text-align: right;">{$record.bytes|bytesToHRF:$pageVars.ByteUnit}</td>
+                <td style="width: 15%; text-align: center;">{$record.cachePercent}%</td>
+            </tr>
+            {assign var=bytesTotal value=$bytesTotal+$record.bytes}
+        {/foreach}
+        <tr><td colspan="6"></td></tr>
+        <tr>
+            <th style="width: 15%; text-align: center;">TOTALS</th>
+            <th style="width: 35%; text-align: right;"></th>
+            <th style="width: 15%; text-align: right;"></th>
+            <th style="width: 15%; text-align: right;"></th>
+            <th style="width: 15%; text-align: right;">{$bytesTotal|bytesToHRF:$pageVars.ByteUnit}</th>
+            <th style="width: 15%;"></th>
+        </tr>
+    </table>
+</div>
+</center>

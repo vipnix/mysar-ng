@@ -1,14 +1,20 @@
-      <p>
-      <div class="table-responsive"><table class="table table-condensed">
-       <tr><td>Current active users: </td><td>{$pageVars.activeUsers}</td>
-       <tr><td>Current date and time is: </td><td>{$pageVars.currentDateTime}</td>
-       <tr><td>Last processed record: </td><td>{$pageVars.lastTimestampFormatted}</td>
-       <tr><td>Number of records processed at last import: </td><td>{$pageVars.lastImportedRecordsNumber}</td>
-       <tr><td>Last clean-up of the database was done at: </td><td>{$pageVars.lastCleanUp}</td>
-      </table></div>
-    <hr>
-    <a href="http://giannis.stoilis.gr/software/mysar/" target="_blank">{$pageVars.programName}</a> {$pageVars.programVersion} (c) 2004-2005 by <a href="mailto:giannis@stoilis.gr">Giannis Stoilis</a>
-<br>Licenced under the <a href="http://www.fsf.org/copyleft/gpl.html" target="_blank">GNU General Public Licence</a>.
-    </a>
-  </center></body>
+    <div class="footer-table">
+        <table class="table table-condensed">
+            <tr><td>Active Users:</td><td>{$pageVars.activeUsers}</td></tr>
+            <tr><td>Current Time and Date:</td><td>{$pageVars.currentDateTime}</td></tr>
+            <tr><td>Last Import:</td><td>{$pageVars.lastTimestampFormatted}</td></tr>
+            <tr><td>Amount of Imported Data:</td><td>{$pageVars.lastImportedRecordsNumber}</td></tr>
+            <tr><td>Last Database Cleanup Performed:</td><td>{$pageVars.lastCleanUp}</td></tr>
+        </table>
+    </div>
+
+    <div style="margin-top: 1rem; text-align: center; font-size: 12px; color: #777;">
+        Mysar-ng VIPNIX (c) 2014-2025 by Vipnix<br>
+		Licensed under the <a href="https://opensource.org/licenses/BSD-3-Clause" target="_blank">BSD 3-Clause License</a>.<br>
+        Tradução para Português (pt_BR) Vipnix
+    </div>
+
+  </div> <!-- fechamento do body_total -->
+</center>
+</body>
 </html>
