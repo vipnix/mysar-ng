@@ -53,6 +53,14 @@ void MySAR_db_startup()
         exit(EXIT_FAILURE);
     }
 
+    // Ensure autocommit is enabled
+    if (mysql_query(mysql, "SET autocommit=1")) {
+        MySAR_print(MSG_ERROR, "FATAL: Failed to set autocommit: %s\n", mysql_error(mysql));
+        mysql_close(mysql);
+        MySAR_unlock_host();
+        exit(EXIT_FAILURE);
+    }
+
     MySAR_print(MSG_DEBUG, "Connection established to MySQL server with enhanced options.");
     config->db_conn_open = 1;
 }
@@ -178,6 +186,7 @@ void MySAR_db_cleanup()
     MySAR_print(MSG_NOTICE, "History keep days: %s", config->historydays);
     MySAR_print(MSG_NOTICE, "Current Date %s", today);
 
+    // Executar limpeza apenas se lastCleanUp for de um dia anterior
     if (strcmp(today, config->lastcleanup) != 0)
     {
         localtime_r(&time_tm_cleanup, &t_result);
@@ -213,7 +222,7 @@ void MySAR_db_cleanup()
         for (cleanTablesCount = 0; cleanTablesCount < num_clean_tables; cleanTablesCount++)
         {
             memset(&query, 0, sizeof(query));
-            snprintf(query, sizeof(query), "DELETE FROM %s WHERE date < '%s' AND date IS NOT NULL", cleanTables[cleanTablesCount], cleantill);
+            snprintf(query, sizeof(query), "DELETE FROM %s WHERE date < '%s' AND date IS NOT NULL AND date != '0000-00-00'", cleanTables[cleanTablesCount], cleantill);
             MySAR_print(MSG_DEBUG, "Executing query: %s\n", query);
 
             if (mysql_query(mysql, query)) {
@@ -225,15 +234,27 @@ void MySAR_db_cleanup()
             }
         }
 
-        // Atualizar lastCleanUp apenas se alguma linha foi afetada
-        if (total_affected_rows > 0) {
-            snprintf(query, sizeof(query), "UPDATE config SET value = '%s' WHERE name = 'lastCleanUp'", today);
-            if (mysql_query(mysql, query)) {
-                MySAR_print(MSG_ERROR, "Failed to update lastCleanUp: %s\n", mysql_error(mysql));
-            } else {
-                MySAR_print(MSG_DEBUG, "Updated lastCleanUp to %s\n", today);
-            }
+        // Forçar autocommit antes da atualização
+        if (mysql_query(mysql, "SET autocommit=1")) {
+            MySAR_print(MSG_ERROR, "Failed to set autocommit: %s\n", mysql_error(mysql));
+        }
+
+        // Atualizar lastCleanUp após a limpeza
+        memset(&query, 0, sizeof(query));
+        snprintf(query, sizeof(query), "UPDATE config SET value = '%s' WHERE name = 'lastCleanUp'", today);
+        MySAR_print(MSG_DEBUG, "Executing query: %s\n", query);
+        if (mysql_query(mysql, query)) {
+            MySAR_print(MSG_ERROR, "Failed to update lastCleanUp: %s\n", mysql_error(mysql));
         } else {
+            unsigned long affected_rows = mysql_affected_rows(mysql);
+            if (affected_rows == 0) {
+                MySAR_print(MSG_NOTICE, "No rows affected by lastCleanUp update. Check if 'lastCleanUp' exists in config table.\n");
+            } else {
+                MySAR_print(MSG_DEBUG, "Updated lastCleanUp to %s (Affected Rows: %lu)\n", today, affected_rows);
+            }
+        }
+
+        if (total_affected_rows == 0) {
             MySAR_print(MSG_NOTICE, "No rows were deleted during cleanup. Check data integrity or date values.\n");
         }
 
@@ -254,6 +275,8 @@ void MySAR_db_cleanup()
         }
 
         MySAR_update_config_long(config->optimize_count, "optimizeCounter");
+    } else {
+        MySAR_print(MSG_NOTICE, "Skipping cleanup: lastCleanUp is same as current date (%s).\n", today);
     }
 }
 
