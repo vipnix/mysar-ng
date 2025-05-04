@@ -15,6 +15,15 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+-- Drop existing database
+DROP DATABASE IF EXISTS mysar;
+
+-- Create database
+CREATE DATABASE mysar CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+-- Use database
+USE mysar;
+
 --
 -- Table structure for table `config`
 --
@@ -107,7 +116,7 @@ CREATE TABLE `traffic` (
   `ip` varbinary(32) NOT NULL DEFAULT '0',
   `resultCode` varchar(50) NOT NULL DEFAULT '',
   `bytes` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `url` varchar(255) NOT NULL DEFAULT '',
+  `url` varchar(800) NOT NULL DEFAULT '',
   `authuser` varchar(30) NOT NULL DEFAULT '',
   `sitesID` bigint(20) unsigned NOT NULL DEFAULT '0',
   `usersID` bigint(20) unsigned NOT NULL DEFAULT '0',
@@ -191,3 +200,66 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2014-06-06 11:31:42
+
+-- Otimizações para MySAR-ng: Índices e Tabelas de Resumo
+
+-- Índices adicionais para trafficSummaries
+CREATE INDEX idx_date_summaryTime ON trafficSummaries(date, summaryTime);
+CREATE INDEX idx_date_inCache ON trafficSummaries(date, inCache);
+
+-- Tabela de resumo para traffic
+CREATE TABLE traffic_daily_summary (
+    date DATE NOT NULL,
+    total BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Tabela de resumo para trafficSummaries
+CREATE TABLE trafficSummaries_daily (
+    date DATE NOT NULL,
+    total BIGINT UNSIGNED NOT NULL,
+    total_inCache BIGINT UNSIGNED NOT NULL,
+    total_outCache BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Evento para atualizar traffic_daily_summary
+SET GLOBAL event_scheduler = ON;
+DELIMITER //
+CREATE EVENT update_traffic_summary
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+BEGIN
+    INSERT INTO traffic_daily_summary (date, total)
+    SELECT date, COUNT(*) AS total
+    FROM traffic
+    WHERE date = CURDATE() - INTERVAL 1 DAY
+    GROUP BY date
+    ON DUPLICATE KEY UPDATE total = VALUES(total);
+END//
+DELIMITER ;
+
+-- Evento para atualizar trafficSummaries_daily
+DELIMITER //
+CREATE EVENT update_trafficSummaries_daily
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+BEGIN
+    INSERT INTO trafficSummaries_daily (date, total, total_inCache, total_outCache)
+    SELECT date, COUNT(*), SUM(inCache), SUM(outCache)
+    FROM trafficSummaries
+    WHERE date = CURDATE() - INTERVAL 1 DAY
+    GROUP BY date
+    ON DUPLICATE KEY UPDATE
+        total = VALUES(total),
+        total_inCache = VALUES(total_inCache),
+        total_outCache = VALUES(total_outCache);
+END//
+DELIMITER ;
+
+-- Analisar tabelas para atualizar estatísticas
+ANALYZE TABLE trafficSummaries;
+ANALYZE TABLE traffic_daily_summary;
+ANALYZE TABLE trafficSummaries_daily;
