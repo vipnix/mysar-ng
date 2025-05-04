@@ -10,7 +10,7 @@
 
     <div style="margin-top: 1rem; text-align: center; font-size: 12px; color: #777;">
         Mysar-ng VIPNIX (c) 2014-2025 by Vipnix<br>
-        Licenced under the <a href="https://www.gnu.org/licenses/gpl-2.0.html" target="_blank">GNU General Public Licence</a>.<br>
+		Licensed under the <a href="https://opensource.org/licenses/BSD-3-Clause" target="_blank">BSD 3-Clause License</a>.<br>
         Tradução para Português (pt_BR) Vipnix
     </div>
 
