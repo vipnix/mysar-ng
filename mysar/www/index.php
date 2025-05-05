@@ -99,7 +99,7 @@ if (isset($_REQUEST['usersID'])) {
 }
 
 if(isset($_REQUEST['action']) && $_REQUEST['action']=='setDefaultView') {
-	setDefaultView();
+    setDefaultView($link);
 }
 
 if (isset($_REQUEST['a'])) {

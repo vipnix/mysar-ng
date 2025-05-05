@@ -52,9 +52,9 @@
 
 <p>
     [
-    <a href="{$smarty.server.PHP_SELF}?a={$pageVars.thisPage}&action=setDefaultView&OrderMethod={$pageVars.OrderMethod}&OrderBy={$pageVars.OrderBy}&ByteUnit={$pageVars.ByteUnit}&date={$pageVars.date}&ipID={$pageVars.ipID}&siteID={$pageVars.siteID}">
-        Manter esta visualização como padrão
-    </a>
+	<a href="{$smarty.server.PHP_SELF}?a=details&action=setDefaultView&OrderMethod={$pageVars.OrderMethod}&OrderBy={$pageVars.OrderBy}&ByteUnit={$pageVars.ByteUnit}&date={$pageVars.date}&hostiplong={$pageVars.hostiplong}&sitesID={$pageVars.sitesID}&usersID={$pageVars.usersID}">
+    Manter esta visualização como padrão
+</a>
     ]
 </p>
 

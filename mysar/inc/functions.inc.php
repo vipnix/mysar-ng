@@ -167,8 +167,7 @@ function db_fetch_array($link, $result) {
     }
 }
 
-function setDefaultView() {
-    // Sets the default view(order method,order by, byte unit) for the current page viewed
+function setDefaultView($link) {
     $viewParameters = array('OrderBy', 'OrderMethod', 'ByteUnit');
     foreach ($viewParameters as $key => $value) {
         $dbName = 'default' . $_REQUEST['a'] . $value;
